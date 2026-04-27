@@ -1,19 +1,16 @@
 {
     "simulation": {
-        "id": "projeto_intermedio",
+        "id": "projeto_intermedio_manhattan",
         "duration": "1000s",
         "randomSeed": 268965854,
-        "database": {
-            "generate": true
-        },
         "projection": {
             "centerCoordinates": {
-                "latitude": 41.147874,
-                "longitude": -8.611037
+                "latitude": 0.0,
+                "longitude": 0.0
             },
             "cartesianOffset": {
-                "x": -32639.198,
-                "y": -55245.59
+                "x": 0.0,
+                "y": 0.0
             }
         },
         "network": {
@@ -24,15 +21,28 @@
             "csNet": "10.4.0.0",
             "serverNet": "10.5.0.0",
             "tmcNet": "10.6.0.0"
+        },
+        "database": {
+            "generate": false,
+            "networkFile": "sumo/manhattan.net.xml",
+            "databaseFile": "application/manhattan.db"
         }
     },
     "applications": {
-        "searchPath": "lib/tp-app-1.0.jar"
+        "searchPath": "application/tp-app-1.0.jar"
     },
+    "ambassadors": [
+        {
+            "id": "mapping",
+            "config": "mapping/mapping_config.json",
+            "priority": 10
+        }
+    ],
     "federates": {
         "application": true,
         "sns": true,
         "output": true,
+        "mapping": true,
         "sumo": true
     }
 }
