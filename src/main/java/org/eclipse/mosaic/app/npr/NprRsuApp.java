@@ -5,9 +5,11 @@ import org.eclipse.mosaic.fed.application.app.api.os.RoadSideUnitOperatingSystem
 import org.eclipse.mosaic.fed.application.app.api.CommunicationApplication;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.ReceivedV2xMessage;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.ReceivedAcknowledgement;
+import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.AdHocModuleConfiguration;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.CamBuilder;
 import org.eclipse.mosaic.interactions.communication.V2xMessageTransmission;
 import org.eclipse.mosaic.lib.util.scheduling.Event;
+import org.eclipse.mosaic.lib.enums.AdHocChannel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +27,13 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
 
     @Override
     public void onStartup() {
-        getOs().getAdHocModule().enable(); //Ligar antena AdHoc para receber mensagens dos veículos
+        getOs().getAdHocModule().enable(new AdHocModuleConfiguration()
+                .addRadio()
+                .channel(AdHocChannel.CCH)
+                .power(50)
+                .distance(140)
+                .create()
+        ); //Ligar antena AdHoc para receber mensagens dos veículos
         System.out.println("RSU " + getOs().getId() + " online com Gestão Dinâmica!");
 
         getOs().getEventManager().addEvent(getOs().getSimulationTime() + 1000000000L, this); 

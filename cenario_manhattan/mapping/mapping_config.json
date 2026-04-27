@@ -22,7 +22,7 @@
             "name": "rsu_zona1",
             "position": { 
                 "latitude": 0.000014, 
-                "longitude": 0.004401 
+                "longitude": 0.008983 
             },
             "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
             "adHoc": { "maxDistance": 140 }
