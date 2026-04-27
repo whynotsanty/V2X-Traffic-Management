@@ -26,8 +26,7 @@
                 {
                     "name": "Car",
                     "weight": 100,
-                    "applications": ["org.eclipse.mosaic.app.npr.NprVehicleApp"],
-                    "adHoc": { "maxDistance": 140 } 
+                    "applications": ["org.eclipse.mosaic.app.npr.NprVehicleApp"]
                 }
             ]
         },
@@ -41,8 +40,7 @@
                 {
                     "name": "Car",
                     "weight": 100,
-                    "applications": [ "org.eclipse.mosaic.app.npr.NprVehicleApp" ],
-                    "adHoc": { "maxDistance": 140 }
+                    "applications": [ "org.eclipse.mosaic.app.npr.NprVehicleApp" ]
                 }
             ]
         }
@@ -56,10 +54,7 @@
             },
             "applications": [
                 "org.eclipse.mosaic.app.npr.NprRsuApp"
-            ],
-            "adHoc": {
-                "maxDistance": 140
-            }
+            ]
         }
     ]
 }

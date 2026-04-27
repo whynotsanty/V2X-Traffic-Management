@@ -1,6 +1,8 @@
 package org.eclipse.mosaic.app.npr;
 
 import java.awt.Color;
+
+import org.eclipse.mosaic.app.npr.NprVehicleApp.Personalidade;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.VehicleParameters;
 import org.eclipse.mosaic.fed.application.app.AbstractApplication;
 import org.eclipse.mosaic.fed.application.app.api.VehicleApplication;
@@ -8,11 +10,14 @@ import org.eclipse.mosaic.fed.application.app.api.os.VehicleOperatingSystem;
 import org.eclipse.mosaic.lib.objects.vehicle.VehicleData;
 import org.eclipse.mosaic.lib.objects.v2x.V2xMessage;
 import org.eclipse.mosaic.lib.util.scheduling.Event;
+import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.AdHocModuleConfiguration;
 import org.eclipse.mosaic.fed.application.app.api.CommunicationApplication;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.ReceivedV2xMessage;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.ReceivedAcknowledgement;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.CamBuilder;
 import org.eclipse.mosaic.interactions.communication.V2xMessageTransmission;
+import org.eclipse.mosaic.lib.enums.AdHocChannel;
+
 
 public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> implements VehicleApplication, CommunicationApplication {
 
@@ -43,15 +48,22 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
 
     @Override
     public void onStartup() {
+        getOs().getAdHocModule().enable(new AdHocModuleConfiguration()
+                .addRadio()
+                .channel(AdHocChannel.CCH)
+                .power(50)
+                .distance(140)
+                .create()
+    );
         atribuirPersonalidade(); //Define o tipo de condutor
         pintarCarro(); // Feedback visual no SUMO
-        getOs().getAdHocModule().enable(); // Liga o rádio do carro para a comunicação V2X
         
         System.out.println(String.format("[START] Veículo: %-8s | Personalidade: %-16s | Rádio: %s", 
                 getOs().getId(), 
                 minhaPersonalidade.name(), 
                 getOs().getAdHocModule().isEnabled() ? "OK" : "ERRO"));
-        
+                getLog().debugSimTime(this,"CAM INICIADA");
+
         // Criamos o primeiro evento para o envio do CAM, que se auto-agendará a cada segundo
         proximoCamTempo = getOs().getSimulationTime() + INTERVALO_CAM;
         getOs().getEventManager().addEvent(proximoCamTempo, this);
