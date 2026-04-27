@@ -21,8 +21,8 @@
         {
             "name": "rsu_zona1",
             "position": { 
-                "latitude": -0.003970, 
-                "longitude": 0.008980 
+                "latitude": 0.000014, 
+                "longitude": 0.004401 
             },
             "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
             "adHoc": { "maxDistance": 140 }
@@ -30,8 +30,8 @@
         {
             "name": "rsu_zona2",
             "position": { 
-                "latitude": -0.008080, 
-                "longitude": 0.006800 
+                "latitude": -0.008139, 
+                "longitude": 0.004704 
             },
             "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
             "adHoc": { "maxDistance": 140 }
@@ -39,8 +39,8 @@
         {
             "name": "rsu_zona3",
             "position": { 
-                "latitude": -0.004100, 
-                "longitude": 0.013470 
+                "latitude": -0.005306, 
+                "longitude": 0.013516 
             },
             "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
             "adHoc": { "maxDistance": 140 }
