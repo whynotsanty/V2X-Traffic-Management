@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2026-04-21 10:41:54.893412 by Eclipse SUMO randomTrips.py v1.26.0
+<!-- generated on 2026-04-27 00:13:54.070123 by Eclipse SUMO randomTrips.py v1.26.0
 <configuration>
     <net-file value="manhattan.net.xml"/>
     <route-file value="background.rou.xml"/>
-    <fringe-factor value="10"/>
     <period value="2.0"/>
 </configuration>
 -->
 
-<!-- generated on 2026-04-21T10:41:54.677556+00:00 by Eclipse SUMO duarouter 1.26.0
+<!-- generated on 2026-04-27T00:13:53.623765+00:00 by Eclipse SUMO duarouter 1.26.0
 <duarouterConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
 
     <input>
@@ -65,7 +64,7 @@
         <route edges="-E24 -E23 -E28 -E27 E13 E14 E15"/>
     </vehicle>
     <vehicle id="9" depart="18.00">
-        <route edges="E30 -E8 E42 E41 E40 -E32 -E0"/>
+        <route edges="E30 -E8 E42 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="10" depart="20.00">
         <route edges="E30 E9 E31 E19 E20 E21 E22"/>
@@ -554,7 +553,7 @@
         <route edges="-E1 E32 E43 E42 E41 -E7 -E6 E46 E26 E27 E28 -E22"/>
     </vehicle>
     <vehicle id="172" depart="344.00">
-        <route edges="-E32 -E0 E30 E9 E31 -E18 E54 E35"/>
+        <route edges="-E32 E1 -E39 -E38 E51 -E11 E34 E55 E54 E35"/>
     </vehicle>
     <vehicle id="173" depart="346.00">
         <route edges="E7 E40 E43 E42 E41 -E7 -E6 E46 E45 E44 -E29"/>
@@ -758,7 +757,7 @@
         <route edges="E34 E55 E54 E53 -E17 -E16 E28"/>
     </vehicle>
     <vehicle id="240" depart="480.00">
-        <route edges="-E36 -E21 -E35 E53 E52 -E34 -E33 E41 E40 -E32 -E0"/>
+        <route edges="-E36 -E21 -E35 E53 E52 -E34 -E33 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="241" depart="482.00">
         <route edges="-E34 E11 E50 E49 E12 E27"/>
@@ -779,7 +778,7 @@
         <route edges="-E4 -E3 -E2 -E39 -E38 E51 -E11 -E10"/>
     </vehicle>
     <vehicle id="247" depart="494.00">
-        <route edges="-E32 -E0 E30 E9 E31 E19 E20 E21"/>
+        <route edges="-E32 E1 -E39 -E38 E51 -E11 E34 E55 E54 E35 E21"/>
     </vehicle>
     <vehicle id="248" depart="496.00">
         <route edges="-E38 E51 E50 -E37 -E36 -E21 -E20"/>
@@ -1466,7 +1465,7 @@
         <route edges="E24 -E14 -E25 E5 E44 E47 E6 E7 E40 E43 E8"/>
     </vehicle>
     <vehicle id="476" depart="952.00">
-        <route edges="E7 E40 -E32 -E0 E30"/>
+        <route edges="E7 E40 E43 E42 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="477" depart="954.00">
         <route edges="-E35 E53 E52 -E34 -E33 E41 -E7 E39 E2 E3"/>
@@ -1640,7 +1639,7 @@
         <route edges="E18 -E31 E10 E11"/>
     </vehicle>
     <vehicle id="534" depart="1068.00">
-        <route edges="-E32 -E0 E30 E9"/>
+        <route edges="-E32 E1 -E39 E7 E40 E43 E8 E9"/>
     </vehicle>
     <vehicle id="535" depart="1070.00">
         <route edges="E10 -E33 E41 -E7 -E6"/>
@@ -1688,7 +1687,7 @@
         <route edges="E14 E15 E16 E37 E49 E12"/>
     </vehicle>
     <vehicle id="550" depart="1100.00">
-        <route edges="-E32 -E0 E30 E9 E31 -E18 E54 E53 -E17"/>
+        <route edges="-E32 E1 -E39 -E38 E51 -E11 E34 E55 E54 E53 -E17"/>
     </vehicle>
     <vehicle id="551" depart="1102.00">
         <route edges="-E34 -E10 E31 E19 E20"/>
@@ -1736,7 +1735,7 @@
         <route edges="E23 E24 E15 E16 E17 E52 -E34 -E10 -E9 -E30"/>
     </vehicle>
     <vehicle id="566" depart="1132.00">
-        <route edges="-E33 E41 E40 -E32 -E0"/>
+        <route edges="-E33 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="567" depart="1134.00">
         <route edges="E35 E21 E22 -E28 -E27 E13"/>
@@ -1808,7 +1807,7 @@
         <route edges="E23 E24 E15 E16 E17 E52 -E34 -E10 -E9 -E30 E0"/>
     </vehicle>
     <vehicle id="590" depart="1180.00">
-        <route edges="E32 E43 E42 E41 E40 -E32 -E0 E30"/>
+        <route edges="E32 E43 E42 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="591" depart="1182.00">
         <route edges="-E13 -E12 E48 E51 -E11 E34"/>
@@ -1829,7 +1828,7 @@
         <route edges="-E17 E37 E49 E48 E38 E39 -E1"/>
     </vehicle>
     <vehicle id="597" depart="1194.00">
-        <route edges="-E31 E10 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="-E31 E10 -E33 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="598" depart="1196.00">
         <route edges="E17 E52 -E34 -E10 -E9 -E30 E0 E32"/>
@@ -2204,7 +2203,7 @@
         <route edges="-E7 -E38 E51 E50 -E37 -E36 E22"/>
     </vehicle>
     <vehicle id="722" depart="1444.00">
-        <route edges="E18 -E31 E10 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="E18 -E31 E10 -E33 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="723" depart="1446.00">
         <route edges="-E13 -E12 E48 E38 E39 E2 E29"/>
@@ -2249,7 +2248,7 @@
         <route edges="-E9 -E8 E42 E41 -E7 E39"/>
     </vehicle>
     <vehicle id="737" depart="1474.00">
-        <route edges="E1 -E39 E7 E40 -E32 -E0 E30"/>
+        <route edges="E1 -E39 -E38 E51 E50 E49 E48 E38 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="738" depart="1476.00">
         <route edges="E25 -E13 E27 -E15 -E14"/>
@@ -2285,7 +2284,7 @@
         <route edges="-E14 -E13 -E12 E48 E51 -E11 -E10 E31 E19"/>
     </vehicle>
     <vehicle id="749" depart="1498.00">
-        <route edges="-E35 E53 E52 -E34 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="-E35 E53 E52 -E34 -E33 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="750" depart="1500.00">
         <route edges="E21 E22 -E28 -E27 -E26 E45 E44 E47 E6"/>
@@ -2375,7 +2374,7 @@
         <route edges="-E10 -E9 -E8 E42 E33 E11 E50 E49 E12"/>
     </vehicle>
     <vehicle id="779" depart="1558.00">
-        <route edges="-E35 E53 E52 -E34 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="-E35 E53 E52 -E34 -E33 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="780" depart="1560.00">
         <route edges="E12 E27 E16"/>
@@ -2468,7 +2467,7 @@
         <route edges="-E3 E29 E47 E6"/>
     </vehicle>
     <vehicle id="810" depart="1620.00">
-        <route edges="-E8 E42 E41 E40 -E32 -E0 E30"/>
+        <route edges="-E8 E42 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="811" depart="1622.00">
         <route edges="E21 E22 E23 E24 -E14 -E25 -E4 -E3"/>
@@ -3230,7 +3229,7 @@
         <route edges="-E1 -E0 E30 E9 E31"/>
     </vehicle>
     <vehicle id="1064" depart="2128.00">
-        <route edges="E20 -E35 E53 E52 -E34 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="E20 E21 E36 E37 E49 E48 E38 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="1065" depart="2130.00">
         <route edges="E38 -E6 E46 E26 -E12 E48 E51 E50 -E37 -E16"/>
@@ -3431,7 +3430,7 @@
         <route edges="E5 E44 E47 E6 E7 E40 -E32"/>
     </vehicle>
     <vehicle id="1131" depart="2262.00">
-        <route edges="E17 E52 -E34 -E33 E41 E40 -E32 -E0 E30"/>
+        <route edges="E17 E52 -E34 -E33 E41 -E7 E39 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="1132" depart="2264.00">
         <route edges="-E32"/>
@@ -3917,7 +3916,7 @@
         <route edges="E9 E31 -E18 E54 E35 -E20 -E19"/>
     </vehicle>
     <vehicle id="1293" depart="2586.00">
-        <route edges="E10 -E33 E41 E40 -E32 -E0"/>
+        <route edges="E10 -E33 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="1294" depart="2588.00">
         <route edges="E2 E29 E47 E46 E45 -E5"/>
@@ -4274,7 +4273,7 @@
         <route edges="-E6 E46 E45 E44 -E29 -E2 -E1 -E0 E30"/>
     </vehicle>
     <vehicle id="1412" depart="2824.00">
-        <route edges="-E19 -E31 E10 -E33 E41 E40 -E32 -E0"/>
+        <route edges="-E19 -E31 E10 -E33 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="1413" depart="2826.00">
         <route edges="E32 E43 E8"/>
@@ -5006,7 +5005,7 @@
         <route edges="E18 -E31 E10 E11 E50 -E37 -E36 -E21"/>
     </vehicle>
     <vehicle id="1656" depart="3312.00">
-        <route edges="E18 -E31 E10 -E33 E41 E40 -E32 -E0"/>
+        <route edges="E18 -E31 E10 -E33 E41 -E7 E39 -E1 -E0"/>
     </vehicle>
     <vehicle id="1657" depart="3314.00">
         <route edges="-E28 -E27 -E26 E45 E44 E47 E46 E26 E27"/>

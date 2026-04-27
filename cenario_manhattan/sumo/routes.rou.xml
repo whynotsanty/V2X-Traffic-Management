@@ -3,17 +3,17 @@
 
     <vType id="Car" accel="2.6" decel="4.5" sigma="0.5" length="5.0" minGap="2.5" maxSpeed="19.44" guiShape="passenger"/>
 
-    <flow id="flow_z1" type="Car" from="-E39" via="-E38" to="-E36" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
+    <route id="rota_zona1" edges="-E39 -E38 E51 E50 -E37 -E36" />
+    <route id="rota_zona2" edges="-E18 E54 E53 -E17 -E16 -E15" />
+    <route id="rota_zona3" edges="-E28 -E27 -E26 E45 E44 -E29" />
 
-    <flow id="flow_z2" type="Car" from="-E18" via="-E17" to="-E15" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
-
-    <flow id="flow_z3" type="Car" from="-E28" via="-E26" to="-E29" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
+    <flow id="flow_z1" type="Car" route="rota_zona1" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
+    <flow id="flow_z2" type="Car" route="rota_zona2" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
+    <flow id="flow_z3" type="Car" route="rota_zona3" begin="0" end="3600" vehsPerHour="6000" departLane="best" departSpeed="max"/>
 
     <flow id="fundo_noroeste_sudeste" type="Car" from="E0" to="E23" begin="0" end="3600" vehsPerHour="1000" departLane="best" departSpeed="max"/>
-
     <flow id="fundo_nordeste_sudoeste" type="Car" from="-E3" to="E19" begin="0" end="3600" vehsPerHour="1000" departLane="best" departSpeed="max"/>
-
     <flow id="fundo_sudoeste_nordeste" type="Car" from="E20" to="-E38" begin="0" end="3600" vehsPerHour="1000" departLane="best" departSpeed="max"/>
-
     <flow id="fundo_sudeste_noroeste" type="Car" from="-E24" to="-E30" begin="0" end="3600" vehsPerHour="1000" departLane="best" departSpeed="max"/>
-</routes>   
+
+</routes>
