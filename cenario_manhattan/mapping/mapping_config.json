@@ -14,27 +14,36 @@
       "speedDeviation": 0.1,
       "tau": 1.0,
       "applications": ["org.eclipse.mosaic.app.npr.NprVehicleApp"],
-      "adHoc": { "maxDistance": 300 }
+      "adHoc": { "maxDistance": 140 }
     }
   ],
   "rsus": [
-    {
-      "name": "rsu_zona1",
-      "position": { "latitude": 41.147874, "longitude": -8.608078 },
-      "applications": ["org.eclipse.mosaic.app.npr.NprRsuApp"],
-      "adHoc": { "maxDistance": 300 }
-    },
-    {
-      "name": "rsu_zona2",
-      "position": { "latitude": 41.147874, "longitude": -8.596125 },
-      "applications": ["org.eclipse.mosaic.app.npr.NprRsuApp"],
-      "adHoc": { "maxDistance": 300 }
-    },
-    {
-      "name": "rsu_zona3",
-      "position": { "latitude": 41.142484, "longitude": -8.605072 },
-      "applications": ["org.eclipse.mosaic.app.npr.NprRsuApp"],
-      "adHoc": { "maxDistance": 300 }
-    }
-  ]
+        {
+            "name": "rsu_zona1",
+            "position": { 
+                "latitude": -0.003970, 
+                "longitude": 0.008980 
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
+            "adHoc": { "maxDistance": 140 }
+        },
+        {
+            "name": "rsu_zona2",
+            "position": { 
+                "latitude": -0.008080, 
+                "longitude": 0.006800 
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
+            "adHoc": { "maxDistance": 140 }
+        },
+        {
+            "name": "rsu_zona3",
+            "position": { 
+                "latitude": -0.004100, 
+                "longitude": 0.013470 
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ],
+            "adHoc": { "maxDistance": 140 }
+        }
+    ]
 }
