@@ -1,0 +1,26 @@
+Métrica,Média,Mediana,Unidade
+Runs Válidas,28,N/A,número
+
+=== TEMPO DE VIAGEM ===
+Tempo Médio de Viagem,0,0,s
+P50 (Mediana) Tempo de Viagem,0,0,s
+P95 Tempo de Viagem,0,0,s
+
+=== TEMPO DE ESPERA ===
+Tempo Médio de Espera,0,0,s
+
+=== FILA ===
+Comprimento Máximo da Fila,122.68,122.5,m
+Duração da Fila,160.0,160.0,s
+
+=== GARGALO (-E17) ===
+Throughput,0.148,0.12,veículos/s
+Velocidade Média,23.29,28.34,km/h
+
+=== V2X (COMUNICAÇÃO VEICULAR) ===
+Mensagens V2X Total,0,0,número
+Eficiência de Disseminação,0,0,taxa
+
+=== EMISSÕES ===
+CO2 Médio,0,0,g
+Combustível Médio,0,0,ml

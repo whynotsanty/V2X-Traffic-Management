@@ -9,12 +9,12 @@
         },
         "projection": {
             "centerCoordinates": {
-                "latitude": 0.0,
-                "longitude": 0.0
+                "latitude": 40.779502,
+                "longitude": -73.955541
             },
             "cartesianOffset": {
-                "x": 0.0,
-                "y": 0.0
+                "x": -588133.410,
+                "y": -4514804.870
             }
         },
         "network": {
@@ -33,7 +33,6 @@
     "federates": {
         "application": true,
         "sns": true,
-        "output": true,
         "sumo": true
     }
 }

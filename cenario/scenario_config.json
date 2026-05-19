@@ -32,7 +32,6 @@
     "federates": {
         "application": true,
         "sns": true,
-        "output": true,
         "sumo": true
     }
 }
