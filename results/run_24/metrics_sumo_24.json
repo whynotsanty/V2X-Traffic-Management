@@ -1,0 +1,15 @@
+{
+  "queue": {
+    "max_queue_length_m": 115.0,
+    "max_queue_length_vehicles": 23,
+    "avg_queue_vehicles": 16.76,
+    "queue_duration_s": 144
+  },
+  "bottleneck": {
+    "throughput_vehicles_per_s": 0.12,
+    "total_vehicles_measured": 23,
+    "avg_speed_bottleneck_kmh": 28.52,
+    "avg_speed_bottleneck_mps": 7.92,
+    "measurement_duration_s": 190.0
+  }
+}

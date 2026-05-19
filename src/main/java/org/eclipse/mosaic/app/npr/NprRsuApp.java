@@ -24,6 +24,11 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
 
     // Mapa para armazenar a velocidade de cada veículo detetado (ID do veículo -> velocidade)
     private final Map<String, Double> velocidadesVeiculos = new HashMap<>();
+    
+    // === COLETA DE MÉTRICAS (Integração com MOSAIC) ===
+    private MetricsCollector metricsCollector = MetricsCollector.getInstance();
+    private boolean metricsReportGenerated = false;
+    private static final long SIMULATION_END_TIME = 1000000000000L; // 1000 segundos em nanosegundos
 
     @Override
     public void onStartup() {
@@ -50,12 +55,27 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
         NprCamMessage cam = (NprCamMessage) receivedV2xMessage.getMessage();
         String vehicleId = cam.getRouting().getSource().getSourceName();
         velocidadesVeiculos.put(vehicleId, cam.getVelocidade());
+        
+        // === MOSAIC METRICS: Registar CAM recebida ===
+        metricsCollector.recordCamReceived();
         // Guarda a velocidade do veículo que enviou o CAM. A cada 1 segundo, o processoEvent irá calcular a velocidade média e tomar decisões com base nisso.
     }
 
     @Override
     public void processEvent(Event event) throws Exception {
+        // === MOSAIC METRICS: Gerar relatório no final da simulação ===
+        long currentTime = getOs().getSimulationTime();
+        if (!metricsReportGenerated && currentTime >= SIMULATION_END_TIME) {
+            metricsReportGenerated = true;
+            System.out.println("\n[MOSAIC-METRICS] 📊 Simulation ending - Generating final metrics report...");
+            metricsCollector.generateReport();
+            return;
+        }
+        
         int densidadeAtual = velocidadesVeiculos.size();
+        
+        // === MOSAIC METRICS: Registar comprimento da fila ===
+        metricsCollector.recordQueueLength(densidadeAtual);
 
         // Calcular velocidade média dos veículos detetados
         double velMedia = 0;
@@ -68,6 +88,9 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
 
         // Converte a média para km/h
         double velMediaKmH = velMedia * 3.6;
+        
+        // === MOSAIC METRICS: Registar velocidade no gargalo ===
+        metricsCollector.recordBottleneckSpeed(velMediaKmH);
 
         // Lógica de Histerese
         // Só ativa se houver carros suficientes e o trânsito estiver lento (< 40 km/h)
@@ -87,6 +110,8 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
         }
 
         if (avisoAtivo) {
+            // === MOSAIC METRICS: Registar alerta disparado ===
+            metricsCollector.recordAlertTriggered();
             enviarAvisoObras();
         }
 
@@ -124,5 +149,11 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
     @Override
     public void onShutdown() {
         System.out.println("RSU " + getOs().getId() + " desligada.");
+        
+        // === MOSAIC METRICS: Gerar relatório se não foi gerado antes ===
+        if (!metricsReportGenerated) {
+            System.out.println("\n[MOSAIC-METRICS] 📊 RSU Shutdown - Generating final metrics report...");
+            metricsCollector.generateReport();
+        }
     }
 }

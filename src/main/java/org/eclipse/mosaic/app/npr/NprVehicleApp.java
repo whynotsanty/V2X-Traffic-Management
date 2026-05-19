@@ -2,7 +2,6 @@ package org.eclipse.mosaic.app.npr;
 
 import java.awt.Color;
 
-import org.eclipse.mosaic.app.npr.NprVehicleApp.Personalidade;
 import org.eclipse.mosaic.fed.application.ambassador.simulation.VehicleParameters;
 import org.eclipse.mosaic.fed.application.app.AbstractApplication;
 import org.eclipse.mosaic.fed.application.app.api.VehicleApplication;
@@ -45,6 +44,12 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
     private NprDenmMessage mensagemGuardada = null; 
     private final double RADIO_RANGE = 140.0; // Alcance do rádio
     private final long T_MAX_ESPERA = 100000000L; // Tempo máximo de espera para retransmissão (100 ms)
+    
+    // === COLETA DE MÉTRICAS (Integração com MOSAIC) ===
+    private MetricsCollector metricsCollector = MetricsCollector.getInstance();
+    private long tempoInicio = 0;
+    private double velocidadeAcumulada = 0.0;
+    private int contadorAmostraVelocidade = 0;
 
     @Override
     public void onStartup() {
@@ -63,6 +68,10 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
                 minhaPersonalidade.name(), 
                 getOs().getAdHocModule().isEnabled() ? "OK" : "ERRO"));
                 getLog().debugSimTime(this,"CAM INICIADA");
+
+        // === MOSAIC METRICS: Registar início da viagem ===
+        tempoInicio = getOs().getSimulationTime();
+        metricsCollector.recordCamReceived();
 
         // Criamos o primeiro evento para o envio do CAM, que se auto-agendará a cada segundo
         proximoCamTempo = getOs().getSimulationTime() + INTERVALO_CAM;
@@ -204,13 +213,15 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
         }
     }
 
-    private void atribuirPersonalidade() { // Sorteio para definir a personalidade do veículo
-        double sorteio = getRandom().nextDouble();
-        if (sorteio < 0.20) { minhaPersonalidade = Personalidade.COOPERANTE; } //20%
-        else if (sorteio < 0.85) { minhaPersonalidade = Personalidade.PADRAO; } //65%
-        else if (sorteio < 0.95) { minhaPersonalidade = Personalidade.POUCO_COOPERANTE; } //10%
-        else { minhaPersonalidade = Personalidade.NAO_COOPERANTE; } //5%
-    }
+private void atribuirPersonalidade() { 
+    double sorteio = getRandom().nextDouble();
+    
+    if (sorteio < 0.40) { 
+        minhaPersonalidade = Personalidade.POUCO_COOPERANTE; // 40%
+    } else { 
+        minhaPersonalidade = Personalidade.NAO_COOPERANTE;   // Os restantes 60%
+    } 
+}
 
     private void pintarCarro() { // Feedback visual no SUMO com base na personalidade
         VehicleParameters.VehicleParametersChangeRequest mudarCor = getOs().requestVehicleParametersUpdate();
@@ -222,10 +233,30 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
     }
 
     @Override
-    public void onVehicleUpdated(VehicleData previousVehicleData, VehicleData updatedVehicleData) {}
+    public void onVehicleUpdated(VehicleData previousVehicleData, VehicleData updatedVehicleData) {
+        // === MOSAIC METRICS: Acumular velocidades para média ===
+        double velocidadeAtual = updatedVehicleData.getSpeed();
+        if (velocidadeAtual >= 0) {
+            velocidadeAcumulada += velocidadeAtual;
+            contadorAmostraVelocidade++;
+        }
+    }
 
     @Override
     public void onShutdown() {
         System.out.println(String.format("\n[ STOP] Veículo: %-8s | Desligado.", getOs().getId()));
+        
+        // === MOSAIC METRICS: Registar conclusão da viagem ===
+        long tempoFim = getOs().getSimulationTime();
+        double tripDuration = (tempoFim - tempoInicio) / 1e9; // Converter de nanosegundos para segundos
+        double avgSpeed = contadorAmostraVelocidade > 0 ? velocidadeAcumulada / contadorAmostraVelocidade : 0;
+        
+        // Estimar emissões (conservador: ~0.1g CO2 por km)
+        double routeLength = avgSpeed * tripDuration; // km (aproximado)
+        double estimatedCo2 = routeLength * 0.1; // grama
+        double estimatedFuel = routeLength * 0.05; // ml
+        
+        metricsCollector.recordVehicleTrip(getOs().getId(), tripDuration, avgSpeed, 
+                                          estimatedCo2, estimatedFuel, routeLength);
     }
 }

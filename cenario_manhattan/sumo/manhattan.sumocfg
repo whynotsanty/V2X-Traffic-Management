@@ -10,7 +10,7 @@
 
     <time>
         <begin value="0"/>
-        <end value="3600"/>
+        <end value="1000"/>
         <step-length value="1"/>
     </time>
 
@@ -27,6 +27,10 @@
     </report>
 
     <output>
-        <duration-log.statistics value="true"/>
+        <tripinfo-output value="/home/netsim/tpnpr/tripinfo.xml"/>
+        <laneData file="/home/netsim/tpnpr/lane_dump.xml" freq="5" excludeEmpty="true" precision="2"/>
+        <netstate-dump value="/home/netsim/tpnpr/netstate.xml" freq="10"/>
+        <device.emissions.probability value="1.0"/>
     </output>
+
 </configuration>

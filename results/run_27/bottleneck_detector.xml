@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<detector>
+    <interval begin="0.00" end="5.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="5.00" end="10.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="10.00" end="15.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="15.00" end="20.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="20.00" end="25.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="25.00" end="30.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="30.00" end="35.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="35.00" end="40.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="40.00" end="45.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="45.00" end="50.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="50.00" end="55.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="55.00" end="60.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="23.40" speed="8.55" harmonicMeanSpeed="8.55" length="5.00" nVehEntered="2"/>
+    <interval begin="60.00" end="65.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="18.98" speed="10.54" harmonicMeanSpeed="10.54" length="5.00" nVehEntered="2"/>
+    <interval begin="65.00" end="70.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="15.56" speed="12.85" harmonicMeanSpeed="12.85" length="5.00" nVehEntered="2"/>
+    <interval begin="70.00" end="75.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="8.17" speed="12.24" harmonicMeanSpeed="12.24" length="5.00" nVehEntered="1"/>
+    <interval begin="75.00" end="80.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.53" speed="12.10" harmonicMeanSpeed="12.10" length="5.00" nVehEntered="2"/>
+    <interval begin="80.00" end="85.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="13.93" speed="14.35" harmonicMeanSpeed="14.35" length="5.00" nVehEntered="2"/>
+    <interval begin="85.00" end="90.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="7.88" speed="12.69" harmonicMeanSpeed="12.69" length="5.00" nVehEntered="1"/>
+    <interval begin="90.00" end="95.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.13" speed="13.12" harmonicMeanSpeed="13.11" length="5.00" nVehEntered="3"/>
+    <interval begin="95.00" end="100.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="6.17" speed="14.17" harmonicMeanSpeed="14.17" length="5.00" nVehEntered="0"/>
+    <interval begin="100.00" end="105.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.66" speed="12.01" harmonicMeanSpeed="12.01" length="5.00" nVehEntered="2"/>
+    <interval begin="105.00" end="110.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="7.43" speed="13.45" harmonicMeanSpeed="13.45" length="5.00" nVehEntered="1"/>
+    <interval begin="110.00" end="115.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="7.16" speed="13.97" harmonicMeanSpeed="13.97" length="5.00" nVehEntered="1"/>
+    <interval begin="115.00" end="120.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="24.48" speed="8.17" harmonicMeanSpeed="8.17" length="5.00" nVehEntered="2"/>
+    <interval begin="120.00" end="125.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="23.78" speed="8.43" harmonicMeanSpeed="8.41" length="5.00" nVehEntered="2"/>
+    <interval begin="125.00" end="130.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="22.99" speed="9.97" harmonicMeanSpeed="9.94" length="5.00" nVehEntered="3"/>
+    <interval begin="130.00" end="135.00" id="bottleneck_detector" nVehContrib="3" flow="2160.00" occupancy="27.62" speed="9.85" harmonicMeanSpeed="9.84" length="5.00" nVehEntered="2"/>
+    <interval begin="135.00" end="140.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="8.87" speed="11.27" harmonicMeanSpeed="11.27" length="5.00" nVehEntered="1"/>
+    <interval begin="140.00" end="145.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="18.02" speed="11.11" harmonicMeanSpeed="11.10" length="5.00" nVehEntered="2"/>
+    <interval begin="145.00" end="150.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="8.64" speed="11.57" harmonicMeanSpeed="11.57" length="5.00" nVehEntered="1"/>
+    <interval begin="150.00" end="155.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="155.00" end="160.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="24.01" speed="8.33" harmonicMeanSpeed="8.33" length="5.00" nVehEntered="2"/>
+    <interval begin="160.00" end="165.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="27.24" speed="8.28" harmonicMeanSpeed="8.28" length="5.00" nVehEntered="3"/>
+    <interval begin="165.00" end="170.00" id="bottleneck_detector" nVehContrib="3" flow="2160.00" occupancy="30.10" speed="9.15" harmonicMeanSpeed="9.04" length="5.00" nVehEntered="2"/>
+    <interval begin="170.00" end="175.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="17.45" speed="10.84" harmonicMeanSpeed="10.84" length="5.00" nVehEntered="2"/>
+    <interval begin="175.00" end="180.00" id="bottleneck_detector" nVehContrib="3" flow="2160.00" occupancy="17.92" speed="11.48" harmonicMeanSpeed="11.47" length="5.00" nVehEntered="2"/>
+    <interval begin="180.00" end="185.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.48" speed="12.20" harmonicMeanSpeed="12.14" length="5.00" nVehEntered="2"/>
+    <interval begin="185.00" end="190.00" id="bottleneck_detector" nVehContrib="1" flow="720.00" occupancy="8.98" speed="11.13" harmonicMeanSpeed="11.13" length="5.00" nVehEntered="1"/>
+    <interval begin="190.00" end="195.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.27" speed="12.30" harmonicMeanSpeed="12.29" length="5.00" nVehEntered="2"/>
+    <interval begin="195.00" end="200.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="16.11" speed="12.59" harmonicMeanSpeed="12.42" length="5.00" nVehEntered="2"/>
+    <interval begin="200.00" end="205.00" id="bottleneck_detector" nVehContrib="0" flow="0.00" occupancy="0.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="0"/>
+    <interval begin="205.00" end="210.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="24.26" speed="8.25" harmonicMeanSpeed="8.24" length="5.00" nVehEntered="2"/>
+    <interval begin="210.00" end="215.00" id="bottleneck_detector" nVehContrib="2" flow="1440.00" occupancy="22.69" speed="8.82" harmonicMeanSpeed="8.81" length="5.00" nVehEntered="2"/>
+    <interval begin="215.00" end="220.00" id="bottleneck_detector" nVehContrib="2" flow
+</detector>
+</detector>
