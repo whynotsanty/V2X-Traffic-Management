@@ -7,8 +7,8 @@
     <route id="rota_zona2" edges="-E18 E54 E53 -E17 -E16 -E15" />
     <route id="rota_zona3" edges="-E28 -E27 -E26 E45 E44 -E29" />
     
-    <flow id="flow_z1" type="Car" route="rota_zona1" begin="0" end="3600" vehsPerHour="1200" departLane="best" departSpeed="max"/>
-    <flow id="flow_z2" type="Car" route="rota_zona2" begin="0" end="3600" vehsPerHour="1200" departLane="best" departSpeed="max"/>
-    <flow id="flow_z3" type="Car" route="rota_zona3" begin="0" end="3600" vehsPerHour="1200" departLane="best" departSpeed="max"/>
+    <flow id="flow_z1" type="Car" route="rota_zona1" begin="0" end="3600" vehsPerHour="600" departLane="best" departSpeed="max"/>
+    <flow id="flow_z2" type="Car" route="rota_zona2" begin="0" end="3600" vehsPerHour="600" departLane="best" departSpeed="max"/>
+    <flow id="flow_z3" type="Car" route="rota_zona3" begin="0" end="3600" vehsPerHour="600" departLane="best" departSpeed="max"/>
     
     </routes>

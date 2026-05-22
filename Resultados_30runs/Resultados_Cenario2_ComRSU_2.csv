@@ -1,0 +1,11 @@
+Métrica,Média,Mediana
+Trip_Time_Avg,252.30,235.80
+P50,233.15,228.40
+P95,565.70,540.20
+Queue_Max_M,272.40,255.00
+Queue_Duration_S,1495.80,1500.00
+Throughput,5.610,5.720
+V2X_Efficiency,2.52,2.45
+CO2_Avg,179.60,172.10
+Fuel_Avg,89.50,85.80
+Speed_Bottleneck,21.40,22.80

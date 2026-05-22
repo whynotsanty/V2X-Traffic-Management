@@ -7,8 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Colector de métricas integrado 100% com MOSAIC
- * Recolhe TODAS as métricas DURANTE a simulação (não pós-processamento)
+ * Recolhe as métricas durante a simulação
  * Output: metrics_from_wrapper.json
  */
 public class MetricsCollector {
@@ -16,20 +15,19 @@ public class MetricsCollector {
     private static final String OUTPUT_FILE = "/home/netsim/tpnpr/metrics_from_wrapper.json";
     private static final double VEHICLE_LENGTH_M = 5.0;
     
-    // === DADOS DE VIAGENS ===
+    // Dados de Viagens (Coletados pelos veículos no onShutdown)
     private List<VehicleMetric> vehicleMetrics = new ArrayList<>();
     
-    // === DADOS DE FILAS (monitorizadas pela RSU) ===
+    // Dados de Filas (Coletados pela RSU no processEvent)
     private int maxQueueVehicles = 0;
     private List<Integer> queueHistory = new ArrayList<>();
     private List<Double> velocidadesGargalo = new ArrayList<>();
     
-    // === DADOS DE V2X (comunicação) ===
+    // Dados de V2X (Coletados pela RSU e veículos)
     private int totalCamsReceived = 0;
     private int totalDenmsReceived = 0;
     private int totalAlertsTriggered = 0;
     
-    // === SINGLETON ===
     private static MetricsCollector instance;
     
     private MetricsCollector() {}
@@ -40,12 +38,8 @@ public class MetricsCollector {
         }
         return instance;
     }
-    
-    // ===== MÉTODOS DE COLETA =====
-    
-    /**
-     * Registra métrica de uma viagem (chamado pelo NprVehicleApp no onShutdown)
-     */
+      
+    // Regista métrica de uma viagem (chamado pelo NprVehicleApp no onShutdown)
     public synchronized void recordVehicleTrip(String vehicleId, double tripDuration, 
                                                double avgSpeed, double estimatedEmissions,
                                                double estimatedFuel, double routeLength) {
@@ -53,69 +47,57 @@ public class MetricsCollector {
                                             estimatedEmissions, estimatedFuel, routeLength));
     }
     
-    /**
-     * Registra comprimento da fila (chamado pela RSU no processEvent)
-     */
+    // Regista comprimento da fila (chamado pela RSU no processEvent)
     public synchronized void recordQueueLength(int vehicleCount) {
         queueHistory.add(vehicleCount);
         maxQueueVehicles = Math.max(maxQueueVehicles, vehicleCount);
     }
     
-    /**
-     * Registra velocidade no gargalo (chamado pela RSU)
-     */
+    // Regista velocidade no gargalo (chamado pela RSU)
     public synchronized void recordBottleneckSpeed(double speedKmh) {
         if (speedKmh >= 0) {
             velocidadesGargalo.add(speedKmh);
         }
     }
     
-    /**
-     * Registra CAM recebida
-     */
+    // Regista CAM recebida
     public synchronized void recordCamReceived() {
         totalCamsReceived++;
     }
     
-    /**
-     * Registra DENM recebida
-     */
+    // Regista DENM recebida
     public synchronized void recordDenmReceived() {
         totalDenmsReceived++;
     }
     
-    /**
-     * Registra alerta de trânsito acionado
-     */
+    // Regista alerta de trânsito
     public synchronized void recordAlertTriggered() {
         totalAlertsTriggered++;
     }
     
-    /**
-     * Gera relatório final e escreve em JSON
-     */
+    // Gera relatório final e escreve em JSON
     public synchronized void generateReport() {
         try {
             // Calcular estatísticas
             Map<String, Object> report = new HashMap<>();
             
-            // === TRIPS METRICS ===
+            // Trips Metrics
             if (!vehicleMetrics.isEmpty()) {
                 report.put("trips", generateTripsMetrics());
             }
             
-            // === QUEUE METRICS ===
+            // Queue Metrics
             if (!queueHistory.isEmpty()) {
                 report.put("queue", generateQueueMetrics());
             }
             
-            // === THROUGHPUT METRICS ===
+            // Throughput Metrics
             report.put("throughput", generateThroughputMetrics());
             
-            // === V2X METRICS ===
+            // V2X Metrics
             report.put("v2x", generateV2xMetrics());
             
-            // === BOTTLENECK METRICS ===
+            // Bottleneck Metrics
             if (!velocidadesGargalo.isEmpty()) {
                 report.put("bottleneck", generateBottleneckMetrics());
             }
@@ -126,16 +108,14 @@ public class MetricsCollector {
             
             try (FileWriter writer = new FileWriter(OUTPUT_FILE)) {
                 writer.write(json);
-                System.out.println("[MOSAIC-METRICS] ✅ Relatório escrito em: " + OUTPUT_FILE);
+                System.out.println("Relatório de métricas gerado com sucesso");
             }
         } catch (IOException e) {
-            System.err.println("[MOSAIC-METRICS] ❌ Erro ao escrever relatório: " + e.getMessage());
+            System.err.println("Erro ao escrever o relatório de métricas");
         }
     }
     
-    /**
-     * Gera estatísticas de viagens
-     */
+    // Gera estatísticas de viagens
     private Map<String, Object> generateTripsMetrics() {
         Map<String, Object> trips = new HashMap<>();
         
@@ -182,9 +162,7 @@ public class MetricsCollector {
         return trips;
     }
     
-    /**
-     * Gera estatísticas de fila
-     */
+    // Gera métricas de fila (baseado na monitorização da RSU)
     private Map<String, Object> generateQueueMetrics() {
         Map<String, Object> queue = new HashMap<>();
         
@@ -205,9 +183,7 @@ public class MetricsCollector {
         return queue;
     }
     
-    /**
-     * Gera métrica de throughput (baseado em viagens completadas)
-     */
+    // Gera métricas de throughput (baseado nas viagens dos veículos)
     private Map<String, Object> generateThroughputMetrics() {
         Map<String, Object> throughput = new HashMap<>();
         
@@ -225,9 +201,7 @@ public class MetricsCollector {
         return throughput;
     }
     
-    /**
-     * Gera métrica de gargalo (bottleneck)
-     */
+    // Gera métricas do gargalo (baseado nas velocidades medidas pela RSU)
     private Map<String, Object> generateBottleneckMetrics() {
         Map<String, Object> bottleneck = new HashMap<>();
         
@@ -246,9 +220,7 @@ public class MetricsCollector {
         return bottleneck;
     }
     
-    /**
-     * Gera métricas V2X
-     */
+    // Gera métricas de V2X (baseado nas mensagens CAM/DENM e alertas)
     private Map<String, Object> generateV2xMetrics() {
         Map<String, Object> v2x = new HashMap<>();
         
@@ -261,18 +233,16 @@ public class MetricsCollector {
         return v2x;
     }
     
-    /**
-     * Calcula eficiência de disseminação V2X (alertas disparados vs mensagens)
-     */
+    // Calcula a eficiência da disseminação de alertas (quantos alertas foram disparados em relação às mensagens recebidas)
     private double calculateDisseminationEfficiency() {
         int totalMessages = totalCamsReceived + totalDenmsReceived;
         if (totalMessages == 0) return 0;
         
-        // Eficiência: quantos alertas foram disparados em relação às mensagens
+        // Quantos alertas foram disparados em relação às mensagens recebidas
         return round((double)totalAlertsTriggered / totalMessages * 100, 2);
     }
     
-    // ===== FUNÇÕES AUXILIARES =====
+    // Funções auxiliares para estatísticas
     
     private double mean(double[] values) {
         if (values.length == 0) return 0;
@@ -329,7 +299,7 @@ public class MetricsCollector {
         return Math.round(value * multiplier) / multiplier;
     }
     
-    // ===== CLASSE INTERNA: VehicleMetric =====
+    // Classe interna para armazenar métricas de cada veículo
     
     static class VehicleMetric {
         String vehicleId;
