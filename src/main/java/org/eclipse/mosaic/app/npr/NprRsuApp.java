@@ -10,25 +10,23 @@ import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.Ca
 import org.eclipse.mosaic.interactions.communication.V2xMessageTransmission;
 import org.eclipse.mosaic.lib.util.scheduling.Event;
 import org.eclipse.mosaic.lib.enums.AdHocChannel;
-
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Aplicação de Infraestrutura (RSU) para Gestão de Tráfego
+ * Implementa uma política de controlo, baseada na densidade de tráfego recolhida via mensagens CAM
+ */
+public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> implements CommunicationApplication {
 
-public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> implements CommunicationApplication { 
-//A nossa classe herda uma classe base de aplicação e implementa a interface de comunicação para receber mensagens V2X
-
-    private static final int LIMIAR_ALTO = 10; // Ativa o aviso se houver > 10 carros
-    private static final int LIMIAR_BAIXO = 4; // Só desativa se baixar de 4 carros
-    private boolean avisoAtivo = false;
-
-    // Mapa para armazenar a velocidade de cada veículo detetado (ID do veículo -> velocidade)
-    private final Map<String, Double> velocidadesVeiculos = new HashMap<>();
+    // Limiares para o mecanismo de histerese 
+    private static final int LIMIAR_ALTO = 10; // Trigger para início do aviso
+    private static final int LIMIAR_BAIXO = 4; // Reset do aviso (prevenção de oscilação)
     
-    // === COLETA DE MÉTRICAS (Integração com MOSAIC) ===
+    private boolean avisoAtivo = false; 
+    private final Map<String, Double> velocidadesVeiculos = new HashMap<>();
+
     private MetricsCollector metricsCollector = MetricsCollector.getInstance();
-    private boolean metricsReportGenerated = false;
-    private static final long SIMULATION_END_TIME = 1000000000000L; // 1000 segundos em nanosegundos
 
     @Override
     public void onStartup() {
@@ -38,102 +36,77 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
                 .power(50)
                 .distance(140)
                 .create()
-        ); //Ligar antena AdHoc para receber mensagens dos veículos
-        System.out.println("RSU " + getOs().getId() + " online com Gestão Dinâmica!");
-
-        getOs().getEventManager().addEvent(getOs().getSimulationTime() + 1000000000L, this); 
-        // Mete um despertador para a cada 1 segundo avaliar o transito 
+        );
+        
+        System.out.println("[INFO] RSU " + getOs().getId() + " inicializada para controlo de tráfego.");
+        // Agendamento do ciclo de controlo da RSU (2 segundos)
+        getOs().getEventManager().addEvent(getOs().getSimulationTime() + 2000000000L, this); 
     }
 
+    // Processa a receção de mensagens CAM dos veículos
+  
     @Override
     public void onMessageReceived(ReceivedV2xMessage receivedV2xMessage) {
-        
         if (!(receivedV2xMessage.getMessage() instanceof NprCamMessage)) {
             return;
         }
-
         NprCamMessage cam = (NprCamMessage) receivedV2xMessage.getMessage();
         String vehicleId = cam.getRouting().getSource().getSourceName();
-        velocidadesVeiculos.put(vehicleId, cam.getVelocidade());
         
-        // === MOSAIC METRICS: Registar CAM recebida ===
+        velocidadesVeiculos.put(vehicleId, cam.getVelocidade());
         metricsCollector.recordCamReceived();
-        // Guarda a velocidade do veículo que enviou o CAM. A cada 1 segundo, o processoEvent irá calcular a velocidade média e tomar decisões com base nisso.
     }
+
+    // Monitorização de densidade e broadcast de DENMs
 
     @Override
     public void processEvent(Event event) throws Exception {
-        // === MOSAIC METRICS: Gerar relatório no final da simulação ===
-        long currentTime = getOs().getSimulationTime();
-        if (!metricsReportGenerated && currentTime >= SIMULATION_END_TIME) {
-            metricsReportGenerated = true;
-            System.out.println("\n[MOSAIC-METRICS] 📊 Simulation ending - Generating final metrics report...");
-            metricsCollector.generateReport();
-            return;
-        }
-        
         int densidadeAtual = velocidadesVeiculos.size();
-        
-        // === MOSAIC METRICS: Registar comprimento da fila ===
         metricsCollector.recordQueueLength(densidadeAtual);
 
-        // Calcular velocidade média dos veículos detetados
-        double velMedia = 0;
+        double velMediaKmH = 0;
         if (densidadeAtual > 0) {
-            velMedia = velocidadesVeiculos.values().stream()
+            velMediaKmH = velocidadesVeiculos.values().stream()
                     .mapToDouble(Double::doubleValue)
                     .average()
-                    .orElse(0);
+                    .orElse(0) * 3.6;
         }
 
-        // Converte a média para km/h
-        double velMediaKmH = velMedia * 3.6;
-        
-        // === MOSAIC METRICS: Registar velocidade no gargalo ===
         metricsCollector.recordBottleneckSpeed(velMediaKmH);
 
-        // Lógica de Histerese
-        // Só ativa se houver carros suficientes e o trânsito estiver lento (< 40 km/h)
+        // Lógica de Controlo com Histerese Dupla
         if (!avisoAtivo && densidadeAtual >= LIMIAR_ALTO && velMediaKmH < 40.0) {
             avisoAtivo = true;
-            System.out.println(String.format("[ALERTA] Trânsito detetado (%d veíc | vel. média: %.1f km/h). A ativar restrições.",
-                    densidadeAtual, velMediaKmH));
+            System.out.println(String.format("[CONTROLO] Congestionamento detetado. Estado: ATIVO."));
         } 
-        // Só desativa se a estrada ficar vazia ou o trânsito voltar a fluir rápido (> 60 km/h)
         else if (avisoAtivo && (densidadeAtual <= LIMIAR_BAIXO || velMediaKmH > 60.0)) {
             avisoAtivo = false;
-            System.out.println(String.format("[FLUXO] Trânsito regularizado (%d veíc | vel. média: %.1f km/h). A desativar restrições.",
-                    densidadeAtual, velMediaKmH));
-        } else {
-            System.out.println(String.format("[RSU] %d veíc | vel. média: %.1f km/h | aviso: %s",
-                    densidadeAtual, velMediaKmH, avisoAtivo ? "ATIVO" : "inativo"));
+            System.out.println(String.format("[CONTROLO] Fluxo regularizado. Estado: INATIVO."));
         }
 
         if (avisoAtivo) {
-            // === MOSAIC METRICS: Registar alerta disparado ===
             metricsCollector.recordAlertTriggered();
             enviarAvisoObras();
         }
 
-        // Limpa para o próximo intervalo e reagenda para daqui a 2 segundos
+        // Limpeza do buffer de estado e reagendamento do ciclo
         velocidadesVeiculos.clear();
         getOs().getEventManager().addEvent(getOs().getSimulationTime() + 2000000000L, this);
     }
 
+    // Disseminação de mensagens DENM 
     private void enviarAvisoObras() {
         try {
             org.eclipse.mosaic.lib.objects.v2x.MessageRouting routing = getOs().getAdHocModule()
                     .createMessageRouting()
-                    .topoBroadCast(1); // Enviar apenas para veículos na zona de cobertura direta da RSU
-
-            long tempoDeValidade = getOs().getSimulationTime() + 5000000000L; // TTL de 5 segundos
+                    .topoBroadCast(1);
+            
+            long tempoDeValidade = getOs().getSimulationTime() + 5000000000L; 
             NprDenmMessage aviso = new NprDenmMessage(routing, tempoDeValidade);
+            
             getOs().getAdHocModule().sendV2xMessage(aviso);
-
-            System.out.println("RSU " + getOs().getId() + " emitiu DENM: Zona de obras à frente!");
-
         } catch (Exception e) {
-            System.out.println("Erro ao enviar DENM: " + e.getMessage());
+            getLog().error("Erro na disseminação DENM: " + e.getMessage());
         }
     }
 
@@ -148,12 +121,6 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
 
     @Override
     public void onShutdown() {
-        System.out.println("RSU " + getOs().getId() + " desligada.");
-        
-        // === MOSAIC METRICS: Gerar relatório se não foi gerado antes ===
-        if (!metricsReportGenerated) {
-            System.out.println("\n[MOSAIC-METRICS] 📊 RSU Shutdown - Generating final metrics report...");
-            metricsCollector.generateReport();
-        }
+        System.out.println("[INFO] RSU " + getOs().getId() + " finalizou operações.");
     }
 }

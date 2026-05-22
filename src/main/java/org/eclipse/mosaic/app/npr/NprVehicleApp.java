@@ -1,7 +1,6 @@
 package org.eclipse.mosaic.app.npr;
 
 import java.awt.Color;
-
 import org.eclipse.mosaic.fed.application.ambassador.simulation.VehicleParameters;
 import org.eclipse.mosaic.fed.application.app.AbstractApplication;
 import org.eclipse.mosaic.fed.application.app.api.VehicleApplication;
@@ -17,35 +16,38 @@ import org.eclipse.mosaic.fed.application.ambassador.simulation.communication.Ca
 import org.eclipse.mosaic.interactions.communication.V2xMessageTransmission;
 import org.eclipse.mosaic.lib.enums.AdHocChannel;
 
-
+/**
+ * Aplicação Veicular para Gestão Cooperativa em Zona de Obras
+ * Implementa a pilha V2X (ITS-G5) para processamento de recomendações dinâmicas de velocidade (Opção A) e disseminação multi-hop com mitigação de broadcast storms
+ */
 public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> implements VehicleApplication, CommunicationApplication {
 
-    // Implementação do veículo com personalidades
     public enum Personalidade {
-        COOPERANTE, //Segue sempre as ordens e trava suavemente
-        PADRAO, // Segue as ordens 50% das vezes, com desaceleração normal
-        POUCO_COOPERANTE, // Segue as ordens 25% das vezes, com desaceleração brusca
-        NAO_COOPERANTE // Ignora as ordens e mantém velocidade
+        COOPERANTE,
+        PADRAO,
+        POUCO_COOPERANTE,
+        NAO_COOPERANTE
     }
 
+    // Parâmetros de Comportamento e Navegação
     private Personalidade minhaPersonalidade;
-    private final long INTERVALO_CAM = 1000000000L; // 1 segundo em nanossegundos
-    private long proximoCamTempo = 0; // Para proteger o ciclo do CAM contra o Multi-Hop
-    
-    // Lógica de Geocasting e Zonas de Segurança
-    private int zonaDecidida = 0;      // Nível de alerta atual (1,2 ou 3)
-    private boolean decidiuObedecer = false; //Memória da decisão tomada
-    private double ultimaDistancia = -1;
+    private int zonaDecidida = 0;      
+    private boolean decidiuObedecer = false; 
+    private double ultimaDistancia = -1; 
 
-    // Lógica de Multi-Hop
-    private boolean jaRetransmitiu = false; 
-    private boolean aEsperaDeRetransmitir = false; 
-    private long tempoAgendadoParaRetransmitir = 0; 
-    private NprDenmMessage mensagemGuardada = null; 
-    private final double RADIO_RANGE = 140.0; // Alcance do rádio
-    private final long T_MAX_ESPERA = 100000000L; // Tempo máximo de espera para retransmissão (100 ms)
+    // --- Parâmetros de Rede ITS-G5 ---
+    private final long INTERVALO_CAM = 1000000000L; 
+    private long proximoCamTempo = 0; 
+    private final double RADIO_RANGE = 140.0; 
+    private final long T_MAX_ESPERA = 100000000L; 
     
-    // === COLETA DE MÉTRICAS (Integração com MOSAIC) ===
+    // Variáveis de Controlo de Retransmissão (Histerese/Supressão)
+    private boolean jaRetransmitiu = false;
+    private boolean aEsperaDeRetransmitir = false;
+    private long tempoAgendadoParaRetransmitir = 0;
+    private NprDenmMessage mensagemGuardada = null;
+
+    // Coletores de Métricas
     private MetricsCollector metricsCollector = MetricsCollector.getInstance();
     private long tempoInicio = 0;
     private double velocidadeAcumulada = 0.0;
@@ -57,80 +59,76 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
                 .addRadio()
                 .channel(AdHocChannel.CCH)
                 .power(50)
-                .distance(140)
+                .distance((int) RADIO_RANGE)
                 .create()
-    );
-        atribuirPersonalidade(); //Define o tipo de condutor
-        pintarCarro(); // Feedback visual no SUMO
-        
+        );
+
+        atribuirPersonalidade();
+        pintarCarro();
+
         System.out.println(String.format("[START] Veículo: %-8s | Personalidade: %-16s | Rádio: %s", 
-                getOs().getId(), 
-                minhaPersonalidade.name(), 
-                getOs().getAdHocModule().isEnabled() ? "OK" : "ERRO"));
-                getLog().debugSimTime(this,"CAM INICIADA");
+            getOs().getId(), minhaPersonalidade.name(), getOs().getAdHocModule().isEnabled() ? "OK" : "ERRO"));
+        getLog().debugSimTime(this,"CAM INICIADA");
 
-        // === MOSAIC METRICS: Registar início da viagem ===
         tempoInicio = getOs().getSimulationTime();
-        metricsCollector.recordCamReceived();
-
-        // Criamos o primeiro evento para o envio do CAM, que se auto-agendará a cada segundo
         proximoCamTempo = getOs().getSimulationTime() + INTERVALO_CAM;
         getOs().getEventManager().addEvent(proximoCamTempo, this);
     }
 
     @Override
-    public void processEvent(Event event) throws Exception { // Método para processar os eventos agendados
-        long tempoAtual = getOs().getSimulationTime(); 
+    public void processEvent(Event event) throws Exception {
+        long tempoAtual = getOs().getSimulationTime();
 
-        // Evento CAM: Envio periódico de mensagens CAM com a velocidade atual do veículo
+        // Processamento da transmissão periódica (CAM)
         if (tempoAtual >= proximoCamTempo) {
-            // Enviamos NprCamMessage com a velocidade atual para a RSU calcular velocidade média
             double velocidadeAtual = getOs().getVehicleData().getSpeed();
-            org.eclipse.mosaic.lib.objects.v2x.MessageRouting camRouting =
-                    getOs().getAdHocModule().createMessageRouting().topoBroadCast(1);
-            getOs().getAdHocModule().sendV2xMessage(new NprCamMessage(camRouting, velocidadeAtual)); 
-            // Envio do CAM com a velocidade atual
+
+            if (velocidadeAtual >= 0) {
+                velocidadeAcumulada += velocidadeAtual;
+                contadorAmostraVelocidade++;
+            }
+
+            org.eclipse.mosaic.lib.objects.v2x.MessageRouting camRouting = getOs().getAdHocModule().createMessageRouting().topoBroadCast(1);
+            getOs().getAdHocModule().sendV2xMessage(new NprCamMessage(camRouting, velocidadeAtual));
+
             proximoCamTempo = tempoAtual + INTERVALO_CAM;
-            getOs().getEventManager().addEvent(proximoCamTempo, this); // Reagendamos o próximo alarme para manter a periodicidade
+            getOs().getEventManager().addEvent(proximoCamTempo, this);
         }
 
-        // Evento de retransmissão: Verificar se é hora de retransmitir a mensagem guardada
-        if (aEsperaDeRetransmitir && tempoAtual >= tempoAgendadoParaRetransmitir) { 
-            // Se o alarme tocou e ninguém nos cancelou, passamos a mensagem para trás!
+        // Execução da retransmissão DENM assíncrona
+        if (aEsperaDeRetransmitir && tempoAtual >= tempoAgendadoParaRetransmitir) {
             org.eclipse.mosaic.lib.objects.v2x.MessageRouting routing = getOs().getAdHocModule().createMessageRouting().topoBroadCast(1);
             NprDenmMessage msgRetransmitida = new NprDenmMessage(routing, mensagemGuardada.getTempoExpiracao());
             
             getOs().getAdHocModule().sendV2xMessage(msgRetransmitida);
-            
             aEsperaDeRetransmitir = false;
-            jaRetransmitiu = true; // mecanismo anti-loop: só retransmitimos uma vez por mensagem recebida
+            jaRetransmitiu = true;
+            
             System.out.println(String.format("%-8s RETRANSMITIU o alerta para trás (Multi-Hop)!", getOs().getId()));
         }
     }
 
-    
-    // Método para processar mensagens recebidas
+    // Motor de decisão V2X mediante receção de mensagens
     @Override
     public void onMessageReceived(ReceivedV2xMessage receivedV2xMessage) {
         V2xMessage msg = receivedV2xMessage.getMessage();
         
-        if (msg instanceof NprDenmMessage) { // Alerta por parte da RSU
+        if (msg instanceof NprDenmMessage) {
             NprDenmMessage denm = (NprDenmMessage) msg;
-
             
             if (getOs().getSimulationTime() > denm.getTempoExpiracao()) {
-                return; // Ignorar mensagens expiradas
+                return; 
             }
 
-            // Cálculo da distância entre o emissor da mensagem e o receptor para aplicar os filtros de geocasting
             org.eclipse.mosaic.lib.geo.GeoPoint minhaPos = getOs().getNavigationModule().getCurrentPosition();
             org.eclipse.mosaic.lib.geo.GeoPoint emissorPos = msg.getRouting().getSource().getSourcePosition();
             double distancia = minhaPos.distanceTo(emissorPos);
             String nomeEmissor = msg.getRouting().getSource().getSourceName();
 
-            if (ultimaDistancia != -1.0 && distancia > ultimaDistancia) { // Se a distância começar a aumentar, é sinal de que já passamos pela obra
+            // Ignorar alertas se o veículo já ultrapassou a RSU
+            if (ultimaDistancia != -1.0 && distancia > ultimaDistancia) {
                 if (decidiuObedecer) {
-                    getOs().changeSpeedWithPleasantAcceleration(19.44); // Retoma 70 km/h com aceleração suave
+                    getOs().changeSpeedWithPleasantAcceleration(19.44); // 70 km/h (Retoma velocidade máxima)
                     System.out.println(String.format("%-8s Já passou a obra! Retomando velocidade normal. (Dist: %.1fm)", getOs().getId(), distancia));
                     decidiuObedecer = false;
                     zonaDecidida = 0;
@@ -140,41 +138,38 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
             }
             ultimaDistancia = distancia;
 
-            // Supressão e Agendamento para Multi-Hop
+            // Mecanismo de Supressão e Agendamento
             if (aEsperaDeRetransmitir) {
-                // Supressão: outro nó já retransmitiu, cancelamos o nosso envio
                 aEsperaDeRetransmitir = false;
                 jaRetransmitiu = true;
                 System.out.println(String.format("%-8s SUPRIMIU envio (ouviu o alerta de %s).", getOs().getId(), nomeEmissor));
             } else if (!jaRetransmitiu) {
-                // Agendamento: calcular T_wait inversamente proporcional à distância
                 double d = Math.min(distancia, RADIO_RANGE);
                 long tEspera = (long) (T_MAX_ESPERA * (1.0 - (d / RADIO_RANGE)));
-                tEspera += (long) (getRandom().nextDouble() * 10000000L); // jitter 0–10 ms
+                tEspera += (long) (getRandom().nextDouble() * 10000000L); // Aleatorização para evitar colisões de retransmissão
+                
                 tempoAgendadoParaRetransmitir = getOs().getSimulationTime() + tEspera;
                 mensagemGuardada = denm;
                 aEsperaDeRetransmitir = true;
-                getOs().getEventManager().addEvent(tempoAgendadoParaRetransmitir, this); 
-                // Agendamos o evento para tentar retransmitir a mensagem após o tempo de espera calculado
+                
+                getOs().getEventManager().addEvent(tempoAgendadoParaRetransmitir, this);
                 System.out.println(String.format("%-8s AGENDOU retransmissão para %.1f ms (Dist: %.1fm)", getOs().getId(), tEspera / 1000000.0, distancia));
             }
 
-            // Determinar em que zona o veículo se encontra (Funil de 3 zonas)
+            // Mapeamento espacial do funil de velocidade
             int zonaAtual;
-            if      (distancia > 500) zonaAtual = 1; // alerta - 70 km/h
-            else if (distancia > 200) zonaAtual = 2; // aproximação - 50 km/h
-            else                      zonaAtual = 3; // crítica - 30 km/h
+            if      (distancia > 500) zonaAtual = 1; 
+            else if (distancia > 200) zonaAtual = 2; 
+            else                      zonaAtual = 3; 
 
-            // Novo sorteio independente ao entrar numa zona mais próxima
+            // Avaliação estocástica de adoção tecnológica
             if (zonaAtual > zonaDecidida) {
                 decidiuObedecer = (getRandom().nextDouble() < getProbabilidade());
                 zonaDecidida = zonaAtual;
-                System.out.println(String.format("%-8s [%-16s] ZONA %d → %s",
-                    getOs().getId(), minhaPersonalidade.name(), zonaAtual,
-                    decidiuObedecer ? "OBEDECE" : "IGNORA"));
+                System.out.println(String.format("%-8s [%-16s] ZONA %d → %s", getOs().getId(), minhaPersonalidade.name(), zonaAtual, decidiuObedecer ? "OBEDECE" : "IGNORA"));
             }
 
-            // --- FUNIL DE VELOCIDADE ---
+            // Aplicação 70/50/30 mediante restrição da RSU
             if (decidiuObedecer && zonaAtual > 0) {
                 double velocidadeAlvo = (zonaAtual == 1) ? 19.44 :  // 70 km/h
                                         (zonaAtual == 2) ? 13.89 :  // 50 km/h
@@ -193,7 +188,7 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
             }
         }
     }
-    
+
     @Override
     public void onAcknowledgementReceived(ReceivedAcknowledgement acknowledgedMessage) {}
 
@@ -203,60 +198,59 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
     @Override
     public void onMessageTransmitted(V2xMessageTransmission v2xMessageTransmission) {}
 
-
-    private double getProbabilidade() { // Probabilidade de obedecer às ordens com base na personalidade
+    // Define o perfil de adoção às recomendações da infraestrutura
+    private double getProbabilidade() {
         switch (minhaPersonalidade) {
-            case COOPERANTE:       return 1.0; // Obedece sempre
-            case PADRAO:           return 0.5; // Obedece 50% das vezes
-            case POUCO_COOPERANTE: return 0.25; // Obedece 25% das vezes
-            default:               return 0.0; // Nunca obedece
+            case COOPERANTE:       return 1.0; 
+            case PADRAO:           return 0.5; 
+            case POUCO_COOPERANTE: return 0.25; 
+            default:               return 0.0; 
         }
     }
 
-private void atribuirPersonalidade() { 
-    double sorteio = getRandom().nextDouble();
     
-    if (sorteio < 0.40) { 
-        minhaPersonalidade = Personalidade.POUCO_COOPERANTE; // 40%
-    } else { 
-        minhaPersonalidade = Personalidade.NAO_COOPERANTE;   // Os restantes 60%
-    } 
-}
-
-    private void pintarCarro() { // Feedback visual no SUMO com base na personalidade
-        VehicleParameters.VehicleParametersChangeRequest mudarCor = getOs().requestVehicleParametersUpdate();
-        if (minhaPersonalidade == Personalidade.COOPERANTE) { mudarCor.changeColor(Color.GREEN); }
-        else if (minhaPersonalidade == Personalidade.PADRAO) { mudarCor.changeColor(Color.BLUE); }
-        else if (minhaPersonalidade == Personalidade.POUCO_COOPERANTE) { mudarCor.changeColor(Color.MAGENTA); }
-        else { mudarCor.changeColor(Color.RED); }
-        getOs().applyVehicleParametersChange(mudarCor);
+    // Distribuição global de perfis de condução no cenário ativo
+    private void atribuirPersonalidade() { 
+        double sorteio = getRandom().nextDouble();
+        
+        // Tráfego Recetivo, corresponde ao Teste 3: 50% Coop | 50% Padrão
+        if (sorteio < 0.50) { 
+            minhaPersonalidade = Personalidade.COOPERANTE;
+        } else { 
+            minhaPersonalidade = Personalidade.PADRAO;
+        } 
     }
 
-    @Override
-    public void onVehicleUpdated(VehicleData previousVehicleData, VehicleData updatedVehicleData) {
-        // === MOSAIC METRICS: Acumular velocidades para média ===
-        double velocidadeAtual = updatedVehicleData.getSpeed();
-        if (velocidadeAtual >= 0) {
-            velocidadeAcumulada += velocidadeAtual;
-            contadorAmostraVelocidade++;
+    private void pintarCarro() {
+        VehicleParameters.VehicleParametersChangeRequest mudarCor = getOs().requestVehicleParametersUpdate();
+        if (minhaPersonalidade == Personalidade.COOPERANTE) {
+            mudarCor.changeColor(Color.GREEN);
+        } else if (minhaPersonalidade == Personalidade.PADRAO) {
+            mudarCor.changeColor(Color.BLUE);
+        } else if (minhaPersonalidade == Personalidade.POUCO_COOPERANTE) {
+            mudarCor.changeColor(Color.MAGENTA);
+        } else {
+            mudarCor.changeColor(Color.RED);
         }
+        getOs().applyVehicleParametersChange(mudarCor);
     }
 
     @Override
     public void onShutdown() {
         System.out.println(String.format("\n[ STOP] Veículo: %-8s | Desligado.", getOs().getId()));
-        
-        // === MOSAIC METRICS: Registar conclusão da viagem ===
+
         long tempoFim = getOs().getSimulationTime();
-        double tripDuration = (tempoFim - tempoInicio) / 1e9; // Converter de nanosegundos para segundos
+        double tripDuration = (tempoFim - tempoInicio) / 1e9; 
         double avgSpeed = contadorAmostraVelocidade > 0 ? velocidadeAcumulada / contadorAmostraVelocidade : 0;
         
-        // Estimar emissões (conservador: ~0.1g CO2 por km)
-        double routeLength = avgSpeed * tripDuration; // km (aproximado)
-        double estimatedCo2 = routeLength * 0.1; // grama
-        double estimatedFuel = routeLength * 0.05; // ml
-        
-        metricsCollector.recordVehicleTrip(getOs().getId(), tripDuration, avgSpeed, 
-                                          estimatedCo2, estimatedFuel, routeLength);
+        // Estimações para a grelha de avaliação
+        double routeLength = avgSpeed * tripDuration; 
+        double estimatedCo2 = routeLength * 0.1; 
+        double estimatedFuel = routeLength * 0.05; 
+
+        metricsCollector.recordVehicleTrip(getOs().getId(), tripDuration, avgSpeed, estimatedCo2, estimatedFuel, routeLength);
     }
+
+    @Override
+    public void onVehicleUpdated(VehicleData previousVehicleData, VehicleData updatedVehicleData) {}
 }

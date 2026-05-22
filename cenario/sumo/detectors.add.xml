@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
-    <!-- Loop detector no gargalo E1 para medir throughput -->
-    <e1Detector id="detector_bottleneck" lane="E1_0" pos="96" freq="5" file="/home/netsim/tpnpr/detector_output.xml"/>
-</additional>
