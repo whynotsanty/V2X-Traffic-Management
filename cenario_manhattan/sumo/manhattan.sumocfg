@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+<configuration>
     <input>
         <net-file value="manhattan.net.xml"/>
-        <route-files value="manhattan.rou.xml"/>
-        <!-- Referência a detectors.add.xml removida: o ficheiro não existe e
-             não há manhattan.net.xml para validar IDs de edge/gargalo com segurança. -->
+        <route-files value="routes.rou.xml,background.rou.xml"/>
     </input>
     <time>
         <begin value="0"/>
@@ -15,8 +13,6 @@
         <ignore-route-errors value="true"/>
     </processing>
     <output>
-        <!-- Saída real do SUMO para emissões e tempos de viagem.
-             O Agente C copia este ficheiro para results/run_N/tripinfo.xml. -->
         <tripinfo-output value="/home/netsim/opt/tpnpr/tripinfo.xml"/>
         <device.emissions.probability value="1.0"/>
     </output>

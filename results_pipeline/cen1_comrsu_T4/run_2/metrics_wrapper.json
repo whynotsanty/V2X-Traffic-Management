@@ -1,0 +1,48 @@
+{
+  "trips": {
+    "total_fuel_ml": 102774.58,
+    "total_co2_g": 205549.15,
+    "avg_fuel_ml": 74.42,
+    "total_vehicles": 1381,
+    "avg_trip_time_s": 217.82,
+    "percentile_25_s": 145.0,
+    "min_trip_time_s": 0.0,
+    "avg_speed_kmh": 7.63,
+    "percentile_90_s": 399.0,
+    "std_trip_time_s": 122.16,
+    "percentile_50_s": 210.0,
+    "percentile_95_s": 473.0,
+    "max_trip_time_s": 727.0,
+    "percentile_75_s": 260.0,
+    "percentile_99_s": 585.0,
+    "avg_co2_g": 148.84,
+    "max_speed_kmh": 15.31
+  },
+  "bottleneck": {
+    "avg_speed_kmh": 30.31,
+    "min_speed_kmh": 0.0,
+    "max_speed_kmh": 57.9,
+    "measurements": 1500
+  },
+  "throughput": {
+    "avg_throughput_vps": 6.34,
+    "total_vehicles_passed": 1381,
+    "simulation_duration_s": 217
+  },
+  "v2x": {
+    "totalDenmsReceived": 23461,
+    "totalV2xMessages": 65963,
+    "totalRetransmissions": 266,
+    "totalSuppressions": 708,
+    "suppressionRatio": 0.7269,
+    "totalCamsReceived": 42502,
+    "totalAlertsTriggered": 746
+  },
+  "queue": {
+    "avg_queue_vehicles": 14.52,
+    "max_queue_length_vehicles": 46,
+    "max_queue_length_m": 230.0,
+    "measurement_unit": "vehicles in bottleneck",
+    "queue_duration_s": 1500
+  }
+}
