@@ -1,37 +1,70 @@
 #!/bin/bash
-# Script de Teste Único com Seed Aleatória
+# Script de Teste Único - Modo Transparente (Logs no Ecrã)
 
 MOSAIC_HOME="/home/netsim/opt/eclipse-mosaic-24.1"
-SCENARIO_CONFIG="/home/netsim/opt/tpnpr/cenario_manhattan/scenario_config.json"
-PROJECT_HOME="/home/netsim/opt/tpnpr"
+PROJECT_HOME="/home/netsim/tpnpr"
+SCENARIO_CONFIG="$PROJECT_HOME/cenario_manhattan/scenario_config.json"
+RESULTS_DIR="$PROJECT_HOME/results/run_test"
 
-# Gerar uma Seed aleatória
+echo "╔════════════════════════════════════════════╗"
+echo "║         A INICIAR DEMO - 1 RUN             ║"
+echo "╚════════════════════════════════════════════╝"
+
+# Limpar resultados antigos
+rm -rf "$RESULTS_DIR"
+mkdir -p "$RESULTS_DIR"
+
+# 1. Compilar código
+echo "[1/4] A compilar código Maven..."
+cd "$PROJECT_HOME"
+
+# Tirei o '-q' para poderes ver se a compilação falha!
+mvn clean package -DskipTests
+if [ $? -ne 0 ]; then
+    echo "ERRO NA COMPILAÇÃO! Vê o erro do Maven acima."
+    exit 1
+fi
+
+cp "$PROJECT_HOME/target/tp-app-1.0.jar" "$PROJECT_HOME/cenario_manhattan/application/tp-app-1.0.jar"
+
+# Apagar lixo anterior para ter a certeza que o JSON é novo
+rm -f "$PROJECT_HOME/metrics_from_wrapper.json"
+rm -f "$MOSAIC_HOME/metrics_from_wrapper.json"
+
+# 2. Executar MOSAIC
 SEED=$RANDOM
-echo "A iniciar simulação com Seed: $SEED"
+echo "[2/4] A executar MOSAIC (Seed: $SEED)."
+echo "A simulação vai começar! Vê os logs abaixo:"
+echo "--------------------------------------------------------"
 
-# Limpar resultados anteriores
-rm -rf "$PROJECT_HOME/results/run_test"
-mkdir -p "$PROJECT_HOME/results/run_test"
-
-# Mover para a pasta do MOSAIC
 cd "$MOSAIC_HOME"
 
-# Correr o MOSAIC com random seed
-./mosaic.sh -c "$SCENARIO_CONFIG" -r $SEED
+# O comando 'tee' mostra os logs no teu ecrã e grava no ficheiro ao mesmo tempo!
+./mosaic.sh -c "$SCENARIO_CONFIG" -r $SEED 2>&1 | tee "$RESULTS_DIR/mosaic_log.txt"
 
-# Copiar o resultado
-if [ -f "$PROJECT_HOME/metrics_from_wrapper.json" ]; then
-    cp "$PROJECT_HOME/metrics_from_wrapper.json" "$PROJECT_HOME/results/run_test/metrics_test.json"
-    echo "Teste concluído com sucesso!"
-    echo "Resultados da run (Seed $SEED):"
-    cat "$PROJECT_HOME/results/run_test/metrics_test.json"
+echo "--------------------------------------------------------"
+
+# 3. Procurar o ficheiro JSON
+echo "[3/4] A recolher métricas geradas..."
+FILE_PATH=$(find "$PROJECT_HOME" "$MOSAIC_HOME" -name "metrics_from_wrapper.json" -type f | head -n 1)
+
+if [ -n "$FILE_PATH" ]; then
+    echo "Ficheiro gerado com sucesso em: $FILE_PATH"
+    cp "$FILE_PATH" "$RESULTS_DIR/metrics_test.json"
 else
-    echo "Erro: O ficheiro metrics_from_wrapper.json não foi gerado!"
+    echo " ERRO CRÍTICO: O ficheiro JSON não foi gerado!"
+    echo "Lê as últimas linhas vermelhas que apareceram aí em cima no terminal."
+    echo " Provavelmente o código Java (MetricsCollector) deu um 'NullPointerException' ou não encontrou a diretoria."
+    exit 1
 fi
 
-# Copiar tripinfo.xml do SUMO (consumido pelo Agente B), se existir
+# 4. Copiar o tripinfo
+echo "[4/4] A recolher dados do SUMO..."
 if [ -f "$PROJECT_HOME/tripinfo.xml" ]; then
-    cp "$PROJECT_HOME/tripinfo.xml" "$PROJECT_HOME/results/run_test/tripinfo.xml"
-else
-    echo "Aviso: tripinfo.xml não foi gerado!"
+    cp "$PROJECT_HOME/tripinfo.xml" "$RESULTS_DIR/tripinfo.xml"
+    echo "tripinfo.xml copiado."
 fi
+
+echo "╔════════════════════════════════════════════╗"
+echo "║            TESTE CONCLUÍDO!                ║"
+echo "╚════════════════════════════════════════════╝"
