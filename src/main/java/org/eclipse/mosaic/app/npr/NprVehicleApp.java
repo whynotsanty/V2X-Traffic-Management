@@ -98,12 +98,17 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
         // Execução da retransmissão DENM assíncrona
         if (aEsperaDeRetransmitir && tempoAtual >= tempoAgendadoParaRetransmitir) {
             org.eclipse.mosaic.lib.objects.v2x.MessageRouting routing = getOs().getAdHocModule().createMessageRouting().topoBroadCast(1);
-            NprDenmMessage msgRetransmitida = new NprDenmMessage(routing, mensagemGuardada.getTempoExpiracao());
-            
+            // Preserva a recomendação de velocidade e a posição da obra originais ao retransmitir.
+            NprDenmMessage msgRetransmitida = new NprDenmMessage(routing,
+                    mensagemGuardada.getTempoExpiracao(),
+                    mensagemGuardada.getVelocidadeRecomendada(),
+                    mensagemGuardada.getPosicaoObra());
+
             getOs().getAdHocModule().sendV2xMessage(msgRetransmitida);
             aEsperaDeRetransmitir = false;
             jaRetransmitiu = true;
-            
+            metricsCollector.recordRetransmission();
+
             System.out.println(String.format("%-8s RETRANSMITIU o alerta para trás (Multi-Hop)!", getOs().getId()));
         }
     }
@@ -117,15 +122,27 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
             NprDenmMessage denm = (NprDenmMessage) msg;
             
             if (getOs().getSimulationTime() > denm.getTempoExpiracao()) {
-                return; 
+                return;
             }
 
+            // DENM válido recebido.
+            metricsCollector.recordDenmReceived();
+
             org.eclipse.mosaic.lib.geo.GeoPoint minhaPos = getOs().getNavigationModule().getCurrentPosition();
+
+            // Referencial do funil = posição da OBRA (transportada no DENM), não o emissor.
+            org.eclipse.mosaic.lib.geo.GeoPoint posicaoObra = denm.getPosicaoObra();
+            double distancia = minhaPos.distanceTo(posicaoObra);
+
+            // Distância ao emissor: usada apenas no algoritmo multi-hop (back-off) e nos logs.
             org.eclipse.mosaic.lib.geo.GeoPoint emissorPos = msg.getRouting().getSource().getSourcePosition();
-            double distancia = minhaPos.distanceTo(emissorPos);
+            double distanciaEmissor = minhaPos.distanceTo(emissorPos);
             String nomeEmissor = msg.getRouting().getSource().getSourceName();
 
-            // Ignorar alertas se o veículo já ultrapassou a RSU
+            // Velocidade recomendada pela RSU (m/s) — base para a velocidade-alvo modulada por zona.
+            double velRecomendada = denm.getVelocidadeRecomendada();
+
+            // Ignorar alertas se o veículo já ultrapassou a obra (distância à obra a aumentar)
             if (ultimaDistancia != -1.0 && distancia > ultimaDistancia) {
                 if (decidiuObedecer) {
                     getOs().changeSpeedWithPleasantAcceleration(19.44); // 70 km/h (Retoma velocidade máxima)
@@ -138,29 +155,30 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
             }
             ultimaDistancia = distancia;
 
-            // Mecanismo de Supressão e Agendamento
+            // Mecanismo de Supressão e Agendamento (back-off por distância ao EMISSOR)
             if (aEsperaDeRetransmitir) {
                 aEsperaDeRetransmitir = false;
                 jaRetransmitiu = true;
+                metricsCollector.recordSuppression();
                 System.out.println(String.format("%-8s SUPRIMIU envio (ouviu o alerta de %s).", getOs().getId(), nomeEmissor));
             } else if (!jaRetransmitiu) {
-                double d = Math.min(distancia, RADIO_RANGE);
+                double d = Math.min(distanciaEmissor, RADIO_RANGE);
                 long tEspera = (long) (T_MAX_ESPERA * (1.0 - (d / RADIO_RANGE)));
                 tEspera += (long) (getRandom().nextDouble() * 10000000L); // Aleatorização para evitar colisões de retransmissão
-                
+
                 tempoAgendadoParaRetransmitir = getOs().getSimulationTime() + tEspera;
                 mensagemGuardada = denm;
                 aEsperaDeRetransmitir = true;
-                
+
                 getOs().getEventManager().addEvent(tempoAgendadoParaRetransmitir, this);
-                System.out.println(String.format("%-8s AGENDOU retransmissão para %.1f ms (Dist: %.1fm)", getOs().getId(), tEspera / 1000000.0, distancia));
+                System.out.println(String.format("%-8s AGENDOU retransmissão para %.1f ms (Dist emissor: %.1fm)", getOs().getId(), tEspera / 1000000.0, distanciaEmissor));
             }
 
-            // Mapeamento espacial do funil de velocidade
+            // Mapeamento espacial do funil de velocidade (distância à OBRA)
             int zonaAtual;
-            if      (distancia > 500) zonaAtual = 1; 
-            else if (distancia > 200) zonaAtual = 2; 
-            else                      zonaAtual = 3; 
+            if      (distancia > 500) zonaAtual = 1;
+            else if (distancia > 200) zonaAtual = 2;
+            else                      zonaAtual = 3;
 
             // Avaliação estocástica de adoção tecnológica
             if (zonaAtual > zonaDecidida) {
@@ -169,11 +187,12 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
                 System.out.println(String.format("%-8s [%-16s] ZONA %d → %s", getOs().getId(), minhaPersonalidade.name(), zonaAtual, decidiuObedecer ? "OBEDECE" : "IGNORA"));
             }
 
-            // Aplicação 70/50/30 mediante restrição da RSU
+            // Velocidade-alvo = recomendação da RSU modulada pela zona de distância à obra.
+            // Longe: respeita a recomendação; muito perto: aperta para no máximo 30 km/h.
             if (decidiuObedecer && zonaAtual > 0) {
-                double velocidadeAlvo = (zonaAtual == 1) ? 19.44 :  // 70 km/h
-                                        (zonaAtual == 2) ? 13.89 :  // 50 km/h
-                                                           8.33;    // 30 km/h
+                final double LIMITE_PERTO_MS = 30.0 / 3.6; // 30 km/h
+                double velocidadeAlvo = (zonaAtual == 3) ? Math.min(velRecomendada, LIMITE_PERTO_MS)
+                                                         : velRecomendada;
 
                 if (minhaPersonalidade == Personalidade.COOPERANTE) {
                     getOs().changeSpeedWithPleasantAcceleration(velocidadeAlvo);

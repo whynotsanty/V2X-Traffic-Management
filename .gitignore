@@ -1,4 +1,10 @@
 target/
+target/*.jar
 *.class
 *.log
+*.db
 .vscode/
+context/
+metrics_from_wrapper.json
+report.html
+__pycache__/

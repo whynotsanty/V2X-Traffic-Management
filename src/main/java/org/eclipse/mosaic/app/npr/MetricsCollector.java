@@ -12,7 +12,9 @@ import com.google.gson.GsonBuilder;
  */
 public class MetricsCollector {
     
-    private static final String OUTPUT_FILE = "/home/netsim/tpnpr/metrics_from_wrapper.json";
+    // Caminho de saída configurável via system property (default sob /home/netsim/opt/tpnpr).
+    private static final String OUTPUT_FILE = System.getProperty(
+            "npr.metrics.out", "/home/netsim/opt/tpnpr/metrics_from_wrapper.json");
     private static final double VEHICLE_LENGTH_M = 5.0;
     
     // Dados de Viagens (Coletados pelos veículos no onShutdown)
@@ -27,6 +29,8 @@ public class MetricsCollector {
     private int totalCamsReceived = 0;
     private int totalDenmsReceived = 0;
     private int totalAlertsTriggered = 0;
+    private int totalRetransmissions = 0;  // DENMs efetivamente retransmitidos (multi-hop)
+    private int totalSuppressions = 0;     // Retransmissões suprimidas (já ouviram o alerta)
     
     private static MetricsCollector instance;
     
@@ -73,6 +77,16 @@ public class MetricsCollector {
     // Regista alerta de trânsito
     public synchronized void recordAlertTriggered() {
         totalAlertsTriggered++;
+    }
+
+    // Regista uma retransmissão DENM efetiva (multi-hop)
+    public synchronized void recordRetransmission() {
+        totalRetransmissions++;
+    }
+
+    // Regista uma supressão de retransmissão (mitigação de broadcast storm)
+    public synchronized void recordSuppression() {
+        totalSuppressions++;
     }
     
     // Gera relatório final e escreve em JSON
@@ -228,18 +242,22 @@ public class MetricsCollector {
         v2x.put("totalDenmsReceived", totalDenmsReceived);
         v2x.put("totalAlertsTriggered", totalAlertsTriggered);
         v2x.put("totalV2xMessages", totalCamsReceived + totalDenmsReceived);
-        v2x.put("disseminationEfficiency", calculateDisseminationEfficiency());
-        
+
+        // Instrumentação da disseminação multi-hop (mitigação de broadcast storm).
+        v2x.put("totalRetransmissions", totalRetransmissions);
+        v2x.put("totalSuppressions", totalSuppressions);
+        v2x.put("suppressionRatio", calculateSuppressionRatio());
+
         return v2x;
     }
-    
-    // Calcula a eficiência da disseminação de alertas (quantos alertas foram disparados em relação às mensagens recebidas)
-    private double calculateDisseminationEfficiency() {
-        int totalMessages = totalCamsReceived + totalDenmsReceived;
-        if (totalMessages == 0) return 0;
-        
-        // Quantos alertas foram disparados em relação às mensagens recebidas
-        return round((double)totalAlertsTriggered / totalMessages * 100, 2);
+
+    // Rácio de supressão = supressões / (retransmissões + supressões).
+    // Mede a eficácia do mecanismo de mitigação de broadcast storm: quanto maior, mais
+    // retransmissões redundantes foram evitadas.
+    private double calculateSuppressionRatio() {
+        int totalDecisoes = totalRetransmissions + totalSuppressions;
+        if (totalDecisoes == 0) return 0;
+        return round((double) totalSuppressions / totalDecisoes, 4);
     }
     
     // Funções auxiliares para estatísticas

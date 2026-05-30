@@ -78,7 +78,7 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
         if (!avisoAtivo && densidadeAtual >= LIMIAR_ALTO && velMediaKmH < 40.0) {
             avisoAtivo = true;
             System.out.println(String.format("[CONTROLO] Congestionamento detetado. Estado: ATIVO."));
-        } 
+        }
         else if (avisoAtivo && (densidadeAtual <= LIMIAR_BAIXO || velMediaKmH > 60.0)) {
             avisoAtivo = false;
             System.out.println(String.format("[CONTROLO] Fluxo regularizado. Estado: INATIVO."));
@@ -86,7 +86,14 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
 
         if (avisoAtivo) {
             metricsCollector.recordAlertTriggered();
-            enviarAvisoObras();
+
+            // Recomendação adaptativa: depende da densidade medida e da velocidade média do gargalo.
+            double velocidadeRecomendadaMs = calcularVelocidadeRecomendada(densidadeAtual, velMediaKmH);
+
+            // Posição da obra = posição da RSU (referencial do funil para os veículos).
+            org.eclipse.mosaic.lib.geo.GeoPoint posicaoObra = getOs().getInitialPosition();
+
+            enviarAvisoObras(velocidadeRecomendadaMs, posicaoObra);
         }
 
         // Limpeza do buffer de estado e reagendamento do ciclo
@@ -94,16 +101,38 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
         getOs().getEventManager().addEvent(getOs().getSimulationTime() + 2000000000L, this);
     }
 
-    // Disseminação de mensagens DENM 
-    private void enviarAvisoObras() {
+    // Política adaptativa de recomendação de velocidade (cumprimento de R3).
+    // Combina a densidade medida (nº de veículos a reportar CAM) com a velocidade média do gargalo,
+    // reutilizando a histerese existente (LIMIAR_ALTO/LIMIAR_BAIXO) para definir os patamares.
+    // Devolve a velocidade recomendada em m/s.
+    private double calcularVelocidadeRecomendada(int densidade, double velMediaKmH) {
+        double recomendadaKmH;
+
+        if (densidade >= LIMIAR_ALTO || velMediaKmH < 20.0) {
+            // Tráfego muito denso ou muito lento -> recomendação mais restritiva.
+            recomendadaKmH = 30.0;
+        } else if (densidade > LIMIAR_BAIXO || velMediaKmH < 40.0) {
+            // Tráfego moderado -> recomendação intermédia.
+            recomendadaKmH = 40.0;
+        } else {
+            // Tráfego ligeiro -> recomendação mais permissiva.
+            recomendadaKmH = 50.0;
+        }
+
+        return recomendadaKmH / 3.6; // Conversão km/h -> m/s
+    }
+
+    // Disseminação de mensagens DENM
+    private void enviarAvisoObras(double velocidadeRecomendadaMs, org.eclipse.mosaic.lib.geo.GeoPoint posicaoObra) {
         try {
             org.eclipse.mosaic.lib.objects.v2x.MessageRouting routing = getOs().getAdHocModule()
                     .createMessageRouting()
                     .topoBroadCast(1);
-            
-            long tempoDeValidade = getOs().getSimulationTime() + 5000000000L; 
-            NprDenmMessage aviso = new NprDenmMessage(routing, tempoDeValidade);
-            
+
+            long tempoDeValidade = getOs().getSimulationTime() + 5000000000L;
+            NprDenmMessage aviso = new NprDenmMessage(routing, tempoDeValidade,
+                    velocidadeRecomendadaMs, posicaoObra);
+
             getOs().getAdHocModule().sendV2xMessage(aviso);
         } catch (Exception e) {
             getLog().error("Erro na disseminação DENM: " + e.getMessage());
@@ -122,5 +151,8 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
     @Override
     public void onShutdown() {
         System.out.println("[INFO] RSU " + getOs().getId() + " finalizou operações.");
+        // Aciona a geração do relatório de métricas no fim da simulação.
+        // Idempotente com várias RSUs: reescreve sempre o mesmo ficheiro.
+        MetricsCollector.getInstance().generateReport();
     }
 }
