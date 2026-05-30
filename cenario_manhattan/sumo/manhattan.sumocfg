@@ -1,36 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
-
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
     <input>
         <net-file value="manhattan.net.xml"/>
-        <route-files value="routes.rou.xml, background.rou.xml"/>
-        <additional-files value="simulation.add.xml"/>
+        <route-files value="manhattan.rou.xml"/>
+        <!-- Referência a detectors.add.xml removida: o ficheiro não existe e
+             não há manhattan.net.xml para validar IDs de edge/gargalo com segurança. -->
     </input>
-
     <time>
         <begin value="0"/>
-        <end value="1000"/>
-        <step-length value="1"/>
+        <end value="3600"/>
+        <step-length value="1.0"/>
     </time>
-
     <processing>
-        <time-to-teleport value="-1"/>
-        <ignore-route-errors value="false"/>
-        <collision.action value="warn"/>
-        <collision.check-junctions value="true"/>
+        <ignore-route-errors value="true"/>
     </processing>
-
+    <output>
+        <!-- Saída real do SUMO para emissões e tempos de viagem.
+             O Agente C copia este ficheiro para results/run_N/tripinfo.xml. -->
+        <tripinfo-output value="/home/netsim/opt/tpnpr/tripinfo.xml"/>
+        <device.emissions.probability value="1.0"/>
+    </output>
     <report>
         <verbose value="true"/>
         <no-step-log value="true"/>
     </report>
-
-    <output>
-        <tripinfo-output value="/home/netsim/tpnpr/tripinfo.xml"/>
-        <laneData file="/home/netsim/tpnpr/lane_dump.xml" freq="5" excludeEmpty="true" precision="2"/>
-        <netstate-dump value="/home/netsim/tpnpr/netstate.xml" freq="10"/>
-        <device.emissions.probability value="1.0"/>
-    </output>
-
 </configuration>

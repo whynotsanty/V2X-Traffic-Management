@@ -1,8 +1,8 @@
 #!/bin/bash
 
 MOSAIC_HOME="/home/netsim/opt/eclipse-mosaic-24.1"
-SCENARIO_CONFIG="/home/netsim/tpnpr/cenario_manhattan/scenario_config.json"
-PROJECT_HOME="/home/netsim/tpnpr"
+SCENARIO_CONFIG="/home/netsim/opt/tpnpr/cenario_manhattan/scenario_config.json"
+PROJECT_HOME="/home/netsim/opt/tpnpr"
 RESULTS_DIR="$PROJECT_HOME/results"
 
 echo "╔════════════════════════════════════════════╗"
@@ -30,6 +30,13 @@ for i in {1..30}; do
         echo "Run $i concluída com sucesso."
     else
         echo "Erro na Run $i: metrics_from_wrapper.json não encontrado."
+    fi
+
+    # Copiar tripinfo.xml do SUMO (consumido pelo Agente B), se existir
+    if [ -f "$PROJECT_HOME/tripinfo.xml" ]; then
+        cp "$PROJECT_HOME/tripinfo.xml" "$RUN_DIR/tripinfo.xml"
+    else
+        echo "Aviso na Run $i: tripinfo.xml não encontrado."
     fi
 done
 

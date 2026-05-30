@@ -2,8 +2,8 @@
 # Script de Teste Único com Seed Aleatória
 
 MOSAIC_HOME="/home/netsim/opt/eclipse-mosaic-24.1"
-SCENARIO_CONFIG="/home/netsim/tpnpr/cenario_manhattan/scenario_config.json"
-PROJECT_HOME="/home/netsim/tpnpr"
+SCENARIO_CONFIG="/home/netsim/opt/tpnpr/cenario_manhattan/scenario_config.json"
+PROJECT_HOME="/home/netsim/opt/tpnpr"
 
 # Gerar uma Seed aleatória
 SEED=$RANDOM
@@ -27,4 +27,11 @@ if [ -f "$PROJECT_HOME/metrics_from_wrapper.json" ]; then
     cat "$PROJECT_HOME/results/run_test/metrics_test.json"
 else
     echo "Erro: O ficheiro metrics_from_wrapper.json não foi gerado!"
+fi
+
+# Copiar tripinfo.xml do SUMO (consumido pelo Agente B), se existir
+if [ -f "$PROJECT_HOME/tripinfo.xml" ]; then
+    cp "$PROJECT_HOME/tripinfo.xml" "$PROJECT_HOME/results/run_test/tripinfo.xml"
+else
+    echo "Aviso: tripinfo.xml não foi gerado!"
 fi

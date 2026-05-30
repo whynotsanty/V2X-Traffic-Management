@@ -19,20 +19,6 @@
               <artifactId>maven-compiler-plugin</artifactId>
               <version>3.8.1</version>
           </plugin>
-
-          <!-- JAR Plugin (This sets the Main-Class in the Manifest) -->
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <version>3.2.2</version>
-              <configuration>
-                  <archive>
-                      <manifest>
-                          <mainClass>pt.uminho.npr.tutorial.VehApp</mainClass>
-                      </manifest>
-                  </archive>
-              </configuration>
-          </plugin>
       </plugins>
   </build>
 
