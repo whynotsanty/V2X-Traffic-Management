@@ -299,6 +299,11 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
         double estimatedFuel = routeLength * 0.05; 
 
         metricsCollector.recordVehicleTrip(getOs().getId(), tripDuration, avgSpeed, estimatedCo2, estimatedFuel, routeLength);
+
+        // Garante a escrita do relatório de métricas mesmo no cenário baseline (sem RSU),
+        // onde NprRsuApp.onShutdown() nunca é invocado. generateReport() é idempotente
+        // (reescreve o ficheiro), por isso é seguro chamá-lo a partir de qualquer veículo.
+        metricsCollector.generateReport();
     }
 
     @Override
