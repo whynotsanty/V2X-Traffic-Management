@@ -31,7 +31,12 @@ public class MetricsCollector {
     private int totalAlertsTriggered = 0;
     private int totalRetransmissions = 0;  // DENMs efetivamente retransmitidos (multi-hop)
     private int totalSuppressions = 0;     // Retransmissões suprimidas (já ouviram o alerta)
-    
+
+    // --- Snapshot ao vivo (dashboard em tempo real durante a simulação) ---
+    private static final String LIVE_FILE = System.getProperty("npr.live.out", "/home/netsim/opt/tpnpr/metrics_live.json");
+    private final List<Map<String, Object>> liveSnapshots = new ArrayList<>();
+    private final Gson liveGson = new GsonBuilder().setPrettyPrinting().create();
+
     private static MetricsCollector instance;
     
     private MetricsCollector() {}
@@ -88,7 +93,39 @@ public class MetricsCollector {
     public synchronized void recordSuppression() {
         totalSuppressions++;
     }
-    
+
+    /**
+     * Regista um snapshot do estado da RSU num instante e reescreve o ficheiro
+     * de métricas ao vivo (lido pelo dashboard_live.py durante a simulação).
+     * Chamado pela RSU em cada ciclo de controlo (~2 s).
+     */
+    public synchronized void recordLiveSnapshot(String rsuId, double tempoSimS,
+                                                int densidade, double velMediaKmH,
+                                                boolean avisoAtivo) {
+        Map<String, Object> snap = new LinkedHashMap<>();
+        snap.put("t", round(tempoSimS, 1));
+        snap.put("rsu", rsuId);
+        snap.put("densidade", densidade);
+        snap.put("velMediaGargalo_kmh", round(velMediaKmH, 2));
+        snap.put("avisoAtivo", avisoAtivo);
+        snap.put("totalCamsReceived", totalCamsReceived);
+        snap.put("totalDenmsReceived", totalDenmsReceived);
+        snap.put("totalAlertsTriggered", totalAlertsTriggered);
+        snap.put("totalRetransmissions", totalRetransmissions);
+        snap.put("totalSuppressions", totalSuppressions);
+        liveSnapshots.add(snap);
+
+        Map<String, Object> live = new LinkedHashMap<>();
+        live.put("lastUpdate_s", round(tempoSimS, 1));
+        live.put("numSnapshots", liveSnapshots.size());
+        live.put("snapshots", liveSnapshots);
+        try (FileWriter writer = new FileWriter(LIVE_FILE)) {
+            writer.write(liveGson.toJson(live));
+        } catch (IOException e) {
+            // Falha de escrita ao vivo não deve abortar a simulação
+        }
+    }
+
     // Gera relatório final e escreve em JSON
     public synchronized void generateReport() {
         try {

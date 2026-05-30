@@ -96,6 +96,11 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
             enviarAvisoObras(velocidadeRecomendadaMs, posicaoObra);
         }
 
+        // Snapshot ao vivo para o dashboard em tempo real (a cada ciclo de ~2 s)
+        double tempoSimS = getOs().getSimulationTime() / 1e9;
+        metricsCollector.recordLiveSnapshot(getOs().getId(), tempoSimS,
+                densidadeAtual, velMediaKmH, avisoAtivo);
+
         // Limpeza do buffer de estado e reagendamento do ciclo
         velocidadesVeiculos.clear();
         getOs().getEventManager().addEvent(getOs().getSimulationTime() + 2000000000L, this);

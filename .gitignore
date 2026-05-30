@@ -10,3 +10,7 @@ report.html
 __pycache__/
 
 # Resultados pesados do pipeline (mantem-se apenas o codigo/scripts)
+.venv/
+metrics_live.json
+tripinfo.xml
+results/run_test/
