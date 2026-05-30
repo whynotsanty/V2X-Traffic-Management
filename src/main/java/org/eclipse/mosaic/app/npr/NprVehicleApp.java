@@ -210,16 +210,10 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
 
     
     // Distribuição global de perfis de condução no cenário ativo
-    private void atribuirPersonalidade() { 
-        double sorteio = getRandom().nextDouble();
-        
-        // Tráfego Recetivo, corresponde ao Teste 3: 50% Coop | 50% Padrão
-        if (sorteio < 0.50) { 
-            minhaPersonalidade = Personalidade.COOPERANTE;
-        } else { 
-            minhaPersonalidade = Personalidade.PADRAO;
-        } 
-    }
+private void atribuirPersonalidade() { 
+    // Todos os carros que nascerem serão 100% cooperativos
+    minhaPersonalidade = Personalidade.COOPERANTE; 
+}
 
     private void pintarCarro() {
         VehicleParameters.VehicleParametersChangeRequest mudarCor = getOs().requestVehicleParametersUpdate();

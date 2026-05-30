@@ -2,7 +2,6 @@
     "simulation": {
         "id": "projeto_intermedio_manhattan",
         "duration": "1000s",
-        "randomSeed": 268965854,
         "database": {
             "generate": false,
             "networkFile": "sumo/manhattan.net.xml"

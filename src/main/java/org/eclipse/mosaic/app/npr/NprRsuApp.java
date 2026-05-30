@@ -122,5 +122,9 @@ public class NprRsuApp extends AbstractApplication<RoadSideUnitOperatingSystem> 
     @Override
     public void onShutdown() {
         System.out.println("[INFO] RSU " + getOs().getId() + " finalizou operações.");
+        
+        // Gerar relatório final de métricas
+        metricsCollector.generateReport();
+        System.out.println("[MÉTRICAS] Relatório gerado em: /home/netsim/tpnpr/metrics_from_wrapper.json");
     }
 }
