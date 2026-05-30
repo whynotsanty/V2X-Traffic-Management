@@ -228,16 +228,47 @@ public class NprVehicleApp extends AbstractApplication<VehicleOperatingSystem> i
     }
 
     
-    // Distribuição global de perfis de condução no cenário ativo
-    private void atribuirPersonalidade() { 
+    // Distribuição global de perfis de condução no cenário ativo.
+    // O teste a correr é configurável via -Dnpr.teste=<1..4> (default 3).
+    private void atribuirPersonalidade() {
+        String teste = System.getProperty("npr.teste", "3");
         double sorteio = getRandom().nextDouble();
-        
-        // Tráfego Recetivo, corresponde ao Teste 3: 50% Coop | 50% Padrão
-        if (sorteio < 0.50) { 
-            minhaPersonalidade = Personalidade.COOPERANTE;
-        } else { 
-            minhaPersonalidade = Personalidade.PADRAO;
-        } 
+
+        switch (teste) {
+            case "1":
+                // Teste 1: NAO_COOPERANTE 60% | POUCO_COOPERANTE 40%
+                if (sorteio < 0.60) {
+                    minhaPersonalidade = Personalidade.NAO_COOPERANTE;
+                } else {
+                    minhaPersonalidade = Personalidade.POUCO_COOPERANTE;
+                }
+                break;
+            case "2":
+                // Teste 2: 25% cada (COOPERANTE, PADRAO, POUCO_COOPERANTE, NAO_COOPERANTE)
+                if (sorteio < 0.25) {
+                    minhaPersonalidade = Personalidade.COOPERANTE;
+                } else if (sorteio < 0.50) {
+                    minhaPersonalidade = Personalidade.PADRAO;
+                } else if (sorteio < 0.75) {
+                    minhaPersonalidade = Personalidade.POUCO_COOPERANTE;
+                } else {
+                    minhaPersonalidade = Personalidade.NAO_COOPERANTE;
+                }
+                break;
+            case "4":
+                // Teste 4: COOPERANTE 100%
+                minhaPersonalidade = Personalidade.COOPERANTE;
+                break;
+            case "3":
+            default:
+                // Teste 3 (default): COOPERANTE 50% | PADRAO 50% (tráfego recetivo)
+                if (sorteio < 0.50) {
+                    minhaPersonalidade = Personalidade.COOPERANTE;
+                } else {
+                    minhaPersonalidade = Personalidade.PADRAO;
+                }
+                break;
+        }
     }
 
     private void pintarCarro() {

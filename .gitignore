@@ -8,3 +8,8 @@ context/
 metrics_from_wrapper.json
 report.html
 __pycache__/
+
+# Resultados pesados do pipeline (mantem-se apenas o codigo/scripts)
+results_pipeline/
+Resultados_Pipeline.csv
+Significancia_Pipeline.csv

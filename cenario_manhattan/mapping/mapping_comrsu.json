@@ -1,0 +1,45 @@
+{
+    "config": {
+        "fixedOrder": true
+    },
+    "prototypes": [
+        {
+            "name": "Car",
+            "accel": 2.6,
+            "decel": 4.5,
+            "length": 5.0,
+            "maxSpeed": 19.44,
+            "minGap": 2.5,
+            "sigma": 0.5,
+            "speedDeviation": 0.1,
+            "tau": 1.0,
+            "applications": ["org.eclipse.mosaic.app.npr.NprVehicleApp"]
+        }
+    ],
+    "rsus": [
+        {
+            "name": "rsu_zona1",
+            "position": {
+                "latitude": 40.779465,
+                "longitude": -73.937802
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ]
+        },
+        {
+            "name": "rsu_zona2",
+            "position": {
+                "latitude": 40.771297,
+                "longitude": -73.949503
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ]
+        },
+        {
+            "name": "rsu_zona3",
+            "position": {
+                "latitude": 40.773995,
+                "longitude": -73.937799
+            },
+            "applications": [ "org.eclipse.mosaic.app.npr.NprRsuApp" ]
+        }
+    ]
+}
