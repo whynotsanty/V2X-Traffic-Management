@@ -1,35 +1,35 @@
-# Gestão Cooperativa de Tráfego em Zona de Obras com V2X
+# Cooperative Traffic Management in Construction Zones with V2X
 
-Este projeto propõe uma arquitetura de controlo cooperativo baseada em comunicações V2X para mitigar os impactos negativos de zonas de obras rodoviárias. O sistema implementa uma infraestrutura inteligente (RSU) que atua como mediadora no tráfego, difundindo recomendações dinâmicas de velocidade aos veículos nas imediações.
+This project proposes a cooperative control architecture based on V2X communications to mitigate the negative impacts of road construction zones. The system implements an intelligent infrastructure (RSU) that acts as a traffic mediator, broadcasting dynamic speed recommendations to vehicles in the vicinity.
 
-A solução foi desenvolvida e validada no ambiente de co-simulação Eclipse MOSAIC, em acoplamento direto com o simulador de tráfego SUMO. 
+The solution was developed and validated in the Eclipse MOSAIC co-simulation environment, directly coupled with the SUMO traffic simulator.
 
-## 🛠️ Tecnologias e Ferramentas
-* **Simulador de Tráfego:** SUMO (Simulation of Urban MObility)
-* **Ambiente de Co-Simulação:** Eclipse MOSAIC
-* **Pilha Protocolar de Comunicação:** ETSI ITS-G5
+## 🛠️ Technologies and Tools
+* **Traffic Simulator:** SUMO (Simulation of Urban MObility)
+* **Co-simulation Environment:** Eclipse MOSAIC
+* **Communication Protocol Stack:** ETSI ITS-G5
 
-## ⚙️ Arquitetura do Sistema e Comunicações
+## ⚙️ System Architecture and Communications
 
-A infraestrutura de rede foi desenhada para operar em cenários de elevada densidade veicular, rejeitando abordagens de flooding cego. 
+The network infrastructure was designed to operate in high-density vehicular scenarios, rejecting blind flooding approaches.
 
-* **Distance-Based Contention Forwarding (DBCF):** Mecanismo de mitigação de congestionamento de canal que atribui prioridade de retransmissão aos recetores mais distantes da fonte.
-* **Directional Geocasting:** Técnica implementada para otimizar o uso do canal rádio, garantindo que veículos fora da zona crítica silenciam a cadeia de propagação.
-* **Lógica de Histerese:** A RSU incorpora um sistema condicional de duplo limiar para mitigar a oscilação constante de diretrizes de velocidade.
-* **Afunilamento Cinético:** A velocidade recomendada é determinada de forma adaptativa pelo estado do tráfego e modulada pela distância do recetor à zona de obras.
+* **Distance-Based Contention Forwarding (DBCF):** A channel congestion mitigation mechanism that prioritizes retransmission for receivers furthest from the message source.
+* **Directional Geocasting:** A technique implemented to optimize radio channel usage, ensuring that vehicles outside the critical zone immediately silence the propagation chain.
+* **Hysteresis Logic:** The RSU incorporates a conditional dual-threshold system to mitigate the constant oscillation of speed guidelines (ping-pong effect).
+* **Kinetic Funneling:** The recommended speed is determined adaptively by the RSU based on traffic state and modulated by the receiver's distance to the construction zone.
 
-## 🗺️ Cenário de Simulação
+## 🗺️ Simulation Scenario
 
-* O cenário principal de validação consiste numa rede em formato de grid de Manhattan 4x4.
-* A topologia é composta por 3 RSUs, 4 zonas de semáforos e 4 zonas com rotundas.
-* A injeção de tráfego estocástico foi gerada via script em Python (randomTrips.py).
-* Os testes contemplaram perfis de condução com diferentes taxas de penetração cooperativa (0%, 25%, 50% e 100%).
+* The main validation scenario consists of a 4x4 Manhattan grid network.
+* The topology comprises 3 RSUs, 4 traffic light zones, and 4 roundabout zones.
+* Stochastic traffic injection was generated via a Python script (randomTrips.py).
+* Tests included driving profiles with different cooperative penetration rates (0%, 25%, 50%, and 100%).
 
-## 📊 Principais Resultados
+## 📊 Main Results
 
-A avaliação quantitativa demonstrou que a coordenação Edge em ambientes ITS adversos exige um compromisso entre escoamento máximo e segurança.
+Quantitative evaluation demonstrated that Edge coordination in adverse ITS environments requires a trade-off between maximum throughput and safety.
 
-* **Absorção de Ondas de Choque:** O sistema reduz de forma contundente os tempos de viagem extremos (percentil 95), comprovando a absorção de ondas de choque.
-* **Previsibilidade:** A arquitetura sacrifica a capacidade de escoamento bruto em prol da segurança e da estabilidade do fluxo.
-* **Resiliência da Rede:** O algoritmo DBCF permitiu suprimir cerca de 70% do tráfego redundante no canal ITS-G5, anulando o risco de broadcast storms.
-* **Estabilização Física:** A extensão máxima das filas de espera (spillback) apresenta clara estabilização nos picos de cooperação veicular.
+* **Shockwave Absorption:** The system significantly reduces extreme travel times (95th percentile), proving the absorption of shockwaves.
+* **Predictability:** The architecture sacrifices raw throughput capacity in favor of flow safety and stability.
+* **Network Resilience:** The DBCF algorithm allowed for the suppression of approximately 70% of redundant traffic on the ITS-G5 channel, eliminating the risk of broadcast storms.
+* **Physical Stabilization:** The maximum queue length (spillback) shows clear stabilization at peak vehicular cooperation levels.
