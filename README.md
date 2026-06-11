@@ -30,6 +30,6 @@ A infraestrutura de rede foi desenhada para operar em cenários de elevada densi
 A avaliação quantitativa demonstrou que a coordenação Edge em ambientes ITS adversos exige um compromisso entre escoamento máximo e segurança.
 
 * **Absorção de Ondas de Choque:** O sistema reduz de forma contundente os tempos de viagem extremos (percentil 95), comprovando a absorção de ondas de choque.
-* **Previsibilidade:** A arquitetura sacrifica a capacidade de escoamento bruto em prol da segurança e da estabilidade do fluxo[cite: 1].
+* **Previsibilidade:** A arquitetura sacrifica a capacidade de escoamento bruto em prol da segurança e da estabilidade do fluxo.
 * **Resiliência da Rede:** O algoritmo DBCF permitiu suprimir cerca de 70% do tráfego redundante no canal ITS-G5, anulando o risco de broadcast storms.
 * **Estabilização Física:** A extensão máxima das filas de espera (spillback) apresenta clara estabilização nos picos de cooperação veicular.
